@@ -5,11 +5,18 @@ import os
 import re
 import datetime
 import shutil
+from fastmcp.server.auth.providers.google import GoogleProvider
+
 
 # ------------------------
 # Load environment
 # ------------------------
 load_dotenv()
+
+# ------------------------
+# Authentication
+# ------------------------
+auth = GoogleProvider()
 
 
 # ------------------------
@@ -92,6 +99,7 @@ mcp = FastMCP(
         Headless Obsidian MCP server.
         Provides tools to read, edit, and search notes directly in the vault.
     """,
+    auth=auth,
 )
 
 vault_path = os.getenv("VAULT_PATH")

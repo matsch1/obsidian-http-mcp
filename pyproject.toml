@@ -23,7 +23,8 @@ build-backend = "poetry.core.masonry.api"
 
 [dependency-groups]
 dev = [
-    "pytest-asyncio (>=1.2.0,<2.0.0)"
+    "pytest-asyncio (>=1.2.0,<2.0.0)",
+    "google-auth-oauthlib (>=1.2.2,<2.0.0)"
 ]
 
 [tool.pytest.ini_options]
