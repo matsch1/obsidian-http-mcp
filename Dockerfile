@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN pip install fastmcp python-dotenv
 
-COPY . /app
+COPY src/obsidian_http_mcp /app
 
 ENV VAULT_PATH=/vault
 

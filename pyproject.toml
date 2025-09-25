@@ -1,0 +1,22 @@
+[project]
+name = "obsidian-http-mcp"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Matthias Schaefer",email = "matsch1@gmx.net"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "fastmcp (>=2.12.3,<3.0.0)",
+    "python-dotenv (>=1.1.1,<2.0.0)",
+    "pytest (>=8.4.2,<9.0.0)",
+    "asyncio (>=4.0.0,<5.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "obsidian_http_mcp", from = "src"}]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
