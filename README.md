@@ -13,6 +13,8 @@ The purpose of this mcp is to run on my remote server and connect the obsidian n
 
 ### mcp server
 - docker 
+- '.env' file containing the following secrets:
+  - VAULT_PATH: absolute path to your obsidian vault
 
 ### local test
 - python
