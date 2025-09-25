@@ -11,6 +11,7 @@ import shutil
 # ------------------------
 load_dotenv()
 
+
 # ------------------------
 # Vault interface
 # ------------------------
@@ -81,6 +82,7 @@ class Vault:
             file.write_text(f"# {date.isoformat()}\n\n## Tasks\n", encoding="utf-8")
         return filename
 
+
 # ------------------------
 # MCP server
 # ------------------------
@@ -92,8 +94,9 @@ mcp = FastMCP(
     """,
 )
 
-vault_path = os.getenv("VAULT_PATH", "~/ObsidianVault")
+vault_path = os.getenv("VAULT_PATH")
 VAULT = Vault(vault_path)
+
 
 # ------------------------
 # MCP tools
@@ -102,10 +105,12 @@ VAULT = Vault(vault_path)
 def greet(name: str) -> str:
     return f"Hello, {name}!"
 
+
 @mcp.tool
 def list_notes() -> list[str]:
     """List all notes in the vault."""
     return VAULT.list_notes()
+
 
 @mcp.tool
 def get_note(filename: str, debug: bool = False):
@@ -116,25 +121,30 @@ def get_note(filename: str, debug: bool = False):
         return {"content": content, "debug": dbg}
     return result
 
+
 @mcp.tool
 def write_note(filename: str, content: str) -> dict:
     """Overwrite a note with new content."""
     return VAULT.write_note(filename, content)
+
 
 @mcp.tool
 def add_task(filename: str, task: str) -> dict:
     """Add a new task to a note."""
     return VAULT.add_task(filename, task)
 
+
 @mcp.tool
 def toggle_task(filename: str, task: str, done: bool = True) -> dict:
     """Check or uncheck a task in a note."""
     return VAULT.toggle_task(filename, task, done)
 
+
 @mcp.tool
 def add_tag(filename: str, tag: str) -> dict:
     """Append a tag to a note."""
     return VAULT.add_tag(filename, tag)
+
 
 @mcp.tool
 def get_daily_note(date: str | None = None) -> str:
@@ -145,10 +155,10 @@ def get_daily_note(date: str | None = None) -> str:
         d = None
     return VAULT.get_daily_note(d)
 
+
 # ------------------------
 # Run server
 # ------------------------
 if __name__ == "__main__":
     mcp.run(transport="http", host="0.0.0.0", port=9001)
     # mcp.run(transport="stdio")
-
