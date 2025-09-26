@@ -62,6 +62,58 @@ class Vault:
 
         return file_path
         
+    def patch_content(self, filename: str, content: str, position: dict):
+        if not filename.endswith(".md"):
+            filename += ".md"
+
+        file_path = self.path / filename
+        if not file_path.exists():
+            raise FileNotFoundError(f"{filename} does not exist")
+
+        text = file_path.read_text(encoding="utf-8")
+        lines = text.splitlines()
+
+        if position["type"] == "heading":
+            anchor = position["value"].lstrip("#").strip().lower()
+            for i, line in enumerate(lines):
+                if line.strip().startswith("#"):
+                    heading_text = line.lstrip("#").strip().lower()
+                    if heading_text == anchor:
+                        if position.get("mode") == "before":
+                            lines.insert(i, content)
+                        else:  # default = after
+                            lines.insert(i + 1, content)
+                        break
+
+        elif position["type"] == "block":
+            # block references look like ^block-id
+            anchor = "^" + position["value"].lstrip("^")
+            for i, line in enumerate(lines):
+                if anchor in line:
+                    if position.get("mode") == "before":
+                        lines.insert(i, content)
+                    else:
+                        lines.insert(i + 1, content)
+                    break
+
+        elif position["type"] == "frontmatter":
+            if lines[0].strip() == "---":
+                end = next(i for i, l in enumerate(lines[1:], 1) if l.strip() == "---")
+                frontmatter = "\n".join(lines[1:end])
+                data = yaml.safe_load(frontmatter) or {}
+                key = position["value"]
+                if position.get("mode") == "replace":
+                    data[key] = content
+                else:
+                    old = data.get(key, "")
+                    data[key] = str(old) + ("\n" if old else "") + content
+                new_frontmatter = yaml.safe_dump(data, sort_keys=False).strip()
+                lines = ["---", new_frontmatter, "---"] + lines[end+1:]
+
+        new_text = "\n".join(lines) + "\n"
+        file_path.write_text(new_text, encoding="utf-8")
+
+        return file_path
 
     # def write_note(self, filename: str, content: str):
     #     file = self.path / filename

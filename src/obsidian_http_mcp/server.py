@@ -60,6 +60,11 @@ def append_content(filename: str, content: str) -> str:
     """List all notes in the vault."""
     return VAULT.append_content(filename,content)
 
+@mcp.tool
+def patch_content(filename: str, content: str, position: dict) -> str:
+    """List all notes in the vault."""
+    return VAULT.patch_content(filename,content,position)
+
 # @mcp.tool
 # def write_note(filename: str, content: str) -> dict:
 #     """Overwrite a note with new content."""

@@ -112,6 +112,7 @@ async def test_get_note(mcp_client):
     result = await mcp_client.call_tool("get_file_contents", {"filename": sample_filename})
     assert "test_content" in result.content[0].text
 
+@pytest.mark.asyncio
 async def test_append_to_existing_note(mcp_client):
     # Append content to the existing sample note
     result = await mcp_client.call_tool(
@@ -143,3 +144,44 @@ async def test_append_creates_new_note(mcp_client):
     result = await mcp_client.call_tool("get_file_contents", {"filename": new_filename})
     content = result.content[0].text
     assert new_content in content
+
+@pytest.mark.asyncio
+async def test_patch_content_heading(mcp_client):
+    # Create a note with headings
+    filename = "heading_note.md"
+    initial_content = """# My Note
+
+## Tasks
+- [ ] old task
+
+### Urgent
+- [ ] another
+"""
+    # Write it into the vault
+    result = await mcp_client.call_tool(
+        "append_content",
+        {"filename": filename, "content": initial_content}
+    )
+
+    # Patch after heading "Tasks" (ignore heading level)
+    result = await mcp_client.call_tool(
+        "patch_content",
+        {
+            "filename": filename,
+            "content": "- [ ] new task",
+            "position": {"type": "heading", "value": "Tasks", "mode": "after"}
+        }
+    )
+    assert filename in result.content[0].text
+
+    # Verify the updated note contains new task under Tasks
+    result = await mcp_client.call_tool("get_file_contents", {"filename": filename})
+    content = result.content[0].text
+    assert "- [ ] new task" in content
+
+    # And it should appear before "### Urgent"
+    tasks_index = content.index("## Tasks")
+    urgent_index = content.index("### Urgent")
+    new_task_index = content.index("- [ ] new task")
+    assert tasks_index < new_task_index < urgent_index
+
