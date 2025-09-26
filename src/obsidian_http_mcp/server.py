@@ -66,30 +66,6 @@ def patch_content(filename: str, content: str, position: dict) -> str:
     return VAULT.patch_content(filename,content,position)
 
 # @mcp.tool
-# def write_note(filename: str, content: str) -> dict:
-#     """Overwrite a note with new content."""
-#     return VAULT.write_note(filename, content)
-#
-#
-# @mcp.tool
-# def add_task(filename: str, task: str) -> dict:
-#     """Add a new task to a note."""
-#     return VAULT.add_task(filename, task)
-#
-#
-# @mcp.tool
-# def toggle_task(filename: str, task: str, done: bool = True) -> dict:
-#     """Check or uncheck a task in a note."""
-#     return VAULT.toggle_task(filename, task, done)
-#
-#
-# @mcp.tool
-# def add_tag(filename: str, tag: str) -> dict:
-#     """Append a tag to a note."""
-#     return VAULT.add_tag(filename, tag)
-#
-#
-# @mcp.tool
 # def get_daily_note(date: str | None = None) -> str:
 #     """Return today's (or given ISO date) daily note filename, creating it if necessary."""
 #     if date:

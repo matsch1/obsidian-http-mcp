@@ -115,35 +115,6 @@ class Vault:
 
         return file_path
 
-    # def write_note(self, filename: str, content: str):
-    #     file = self.path / filename
-    #     file.parent.mkdir(parents=True, exist_ok=True)
-    #     tmp = file.with_suffix(".tmp")
-    #     tmp.write_text(content, encoding="utf-8")
-    #     shutil.move(tmp, file)
-    #     return {"status": "ok"}
-    #
-    # def add_task(self, filename: str, task: str):
-    #     text = self.get_note(filename)
-    #     lines = text.splitlines()
-    #     inserted = False
-    #     for i, line in enumerate(lines):
-    #         if line.strip().lower() == "## tasks":
-    #             lines.insert(i + 1, f"- [ ] {task}")
-    #             inserted = True
-    #             break
-    #     if not inserted:
-    #         lines.append("## Tasks")
-    #         lines.append(f"- [ ] {task}")
-    #     return self.write_note(filename, "\n".join(lines))
-    #
-    # def toggle_task(self, filename: str, task_text: str, done=True):
-    #     text = self.get_note(filename)
-    #     pattern = r"- \[( |x)\] " + re.escape(task_text)
-    #     repl = f"- [{'x' if done else ' '}] {task_text}"
-    #     updated = re.sub(pattern, repl, text)
-    #     return self.write_note(filename, updated)
-    #
     # def add_tag(self, filename: str, tag: str):
     #     text = self.get_note(filename)
     #     updated = text.rstrip() + f"\n#{tag}\n"
