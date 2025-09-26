@@ -31,7 +31,10 @@ VAULT = Vault(vault_path)
 
 
 @mcp.tool
-def list_files_in_vault() -> list[str]:
+def list_files_in_vault(
+    name="list_files_in_vault",
+    description="List all note paths in the obsidian vault.",
+) -> list[str]:
     """List all notes in the vault."""
     return VAULT.list_files_in_vault()
 
