@@ -43,6 +43,26 @@ class Vault:
 
         raise FileNotFoundError(f"No note named {filename} in vault")
 
+    def append_content(self, filename: str, content: str):
+        # append content to an existing or new note
+        # normalize filename
+        if not filename.endswith(".md"):
+            filename += ".md"
+
+        file_path = self.path / filename
+
+        # ensure parent directories exist
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # append the content with a newline before it
+        with file_path.open("a", encoding="utf-8") as f:
+            if not content.endswith("\n"):
+                content += "\n"
+            f.write(content)
+
+        return file_path
+        
+
     # def write_note(self, filename: str, content: str):
     #     file = self.path / filename
     #     file.parent.mkdir(parents=True, exist_ok=True)

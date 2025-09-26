@@ -55,6 +55,10 @@ def get_file_contents(filename: str, debug: bool = False):
         return {"content": content, "debug": dbg}
     return result
 
+@mcp.tool
+def append_content(filename: str, content: str) -> str:
+    """List all notes in the vault."""
+    return VAULT.append_content(filename,content)
 
 # @mcp.tool
 # def write_note(filename: str, content: str) -> dict:
