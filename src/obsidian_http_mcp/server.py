@@ -41,6 +41,10 @@ def list_files_in_vault() -> list[str]:
     """List all notes in the vault."""
     return VAULT.list_files_in_vault()
 
+@mcp.tool
+def list_files_in_dir(dir: str) -> list[str]:
+    """List all notes in the vault."""
+    return VAULT.list_files_in_dir(dir)
 
 @mcp.tool
 def get_file_contents(filename: str, debug: bool = False):

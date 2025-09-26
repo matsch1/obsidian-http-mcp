@@ -22,6 +22,10 @@ class Vault:
     def list_files_in_vault(self):
         return [str(f.relative_to(self.path)) for f in self.path.rglob("*.md")]
 
+    def list_files_in_dir(self, dir: str):
+        dir_path = Path(self.path) / dir
+        return [str(f.relative_to(dir_path)) for f in dir_path.rglob("*.md")]
+
     def get_file_contents(self, filename: str, debug=False):
         # normalize filename
         if not filename.endswith(".md"):
