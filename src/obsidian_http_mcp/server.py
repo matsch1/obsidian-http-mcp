@@ -2,9 +2,6 @@ from fastmcp import FastMCP
 from pathlib import Path
 from dotenv import load_dotenv
 import os
-import re
-import datetime
-import shutil
 
 from vault import Vault
 
@@ -31,9 +28,6 @@ VAULT = Vault(vault_path)
 # ------------------------
 # MCP tools
 # ------------------------
-@mcp.tool
-def greet(name: str) -> str:
-    return f"Hello, {name}!"
 
 
 @mcp.tool
@@ -41,10 +35,12 @@ def list_files_in_vault() -> list[str]:
     """List all notes in the vault."""
     return VAULT.list_files_in_vault()
 
+
 @mcp.tool
 def list_files_in_dir(dir: str) -> list[str]:
     """List all notes in the vault."""
     return VAULT.list_files_in_dir(dir)
+
 
 @mcp.tool
 def get_file_contents(filename: str, debug: bool = False):
@@ -55,15 +51,18 @@ def get_file_contents(filename: str, debug: bool = False):
         return {"content": content, "debug": dbg}
     return result
 
+
 @mcp.tool
 def append_content(filename: str, content: str) -> str:
     """List all notes in the vault."""
-    return VAULT.append_content(filename,content)
+    return VAULT.append_content(filename, content)
+
 
 @mcp.tool
 def patch_content(filename: str, content: str, position: dict) -> str:
     """List all notes in the vault."""
-    return VAULT.patch_content(filename,content,position)
+    return VAULT.patch_content(filename, content, position)
+
 
 # @mcp.tool
 # def get_daily_note(date: str | None = None) -> str:

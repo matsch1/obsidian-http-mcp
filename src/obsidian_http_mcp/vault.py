@@ -1,10 +1,6 @@
-from fastmcp import FastMCP
 from pathlib import Path
 from dotenv import load_dotenv
-import os
-import re
-import datetime
-import shutil
+import yaml
 
 # ------------------------
 # Load environment
@@ -61,7 +57,7 @@ class Vault:
             f.write(content)
 
         return file_path
-        
+
     def patch_content(self, filename: str, content: str, position: dict):
         if not filename.endswith(".md"):
             filename += ".md"
@@ -108,7 +104,7 @@ class Vault:
                     old = data.get(key, "")
                     data[key] = str(old) + ("\n" if old else "") + content
                 new_frontmatter = yaml.safe_dump(data, sort_keys=False).strip()
-                lines = ["---", new_frontmatter, "---"] + lines[end+1:]
+                lines = ["---", new_frontmatter, "---"] + lines[end + 1 :]
 
         new_text = "\n".join(lines) + "\n"
         file_path.write_text(new_text, encoding="utf-8")
