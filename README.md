@@ -50,6 +50,12 @@
 This is an obsidian MCP server using http transport protocoll. 
 The purpose of this server is to provide MCP functionalities for obsidian from a remote server.
 
+**Benefits:**
+  - Centrally hosted MCP server for usage with multiple clients 
+  - Direct access to Obsidian notes on remote server.
+  - Setup fully headless (no Obsidian Rest API)
+  - Easily customizable
+
 ---
 
 ## Features
