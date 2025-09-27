@@ -33,7 +33,6 @@
 - [Overview](#overview)
 - [Features](#features)
 - [Project Structure](#project-structure)
-    - [Project Index](#project-index)
 - [Getting Started](#getting-started)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
@@ -48,13 +47,17 @@
 
 ## Overview
 
-
+This is an obsidian MCP server using http transport protocoll. 
+The purpose of this server is to provide MCP functionalities for obsidian from a remote server.
 
 ---
 
 ## Features
 
-<code>❯ REPLACE-ME</code>
+- [x] Basic obsidian MCP functionalities exist.
+- [x] Run http server in a docker container and access it from AI client (Cursor).
+- [ ] Implementation of user authentication is done.
+- [ ] Advanced obsidian MCP functionalities exist.
 
 ---
 
@@ -78,98 +81,6 @@
         └── test_mcp.py
 ```
 
-### Project Index
-
-<details open>
-	<summary><b><code>OBSIDIAN-HTTP-MCP/</code></b></summary>
-	<!-- __root__ Submodule -->
-	<details>
-		<summary><b>__root__</b></summary>
-		<blockquote>
-			<div class='directory-path' style='padding: 8px 0; color: #666;'>
-				<code><b>⦿ __root__</b></code>
-			<table style='width: 100%; border-collapse: collapse;'>
-			<thead>
-				<tr style='background-color: #f8f9fa;'>
-					<th style='width: 30%; text-align: left; padding: 8px;'>File Name</th>
-					<th style='text-align: left; padding: 8px;'>Summary</th>
-				</tr>
-			</thead>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='./obsidian-http-mcp/blob/master/Dockerfile'>Dockerfile</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='./obsidian-http-mcp/blob/master/client_secret.json'>client_secret.json</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='./obsidian-http-mcp/blob/master/pyproject.toml'>pyproject.toml</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-			</table>
-		</blockquote>
-	</details>
-	<!-- scripts Submodule -->
-	<details>
-		<summary><b>scripts</b></summary>
-		<blockquote>
-			<div class='directory-path' style='padding: 8px 0; color: #666;'>
-				<code><b>⦿ scripts</b></code>
-			<table style='width: 100%; border-collapse: collapse;'>
-			<thead>
-				<tr style='background-color: #f8f9fa;'>
-					<th style='width: 30%; text-align: left; padding: 8px;'>File Name</th>
-					<th style='text-align: left; padding: 8px;'>Summary</th>
-				</tr>
-			</thead>
-				<tr style='border-bottom: 1px solid #eee;'>
-					<td style='padding: 8px;'><b><a href='./obsidian-http-mcp/blob/master/scripts/docker_run.sh'>docker_run.sh</a></b></td>
-					<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-				</tr>
-			</table>
-		</blockquote>
-	</details>
-	<!-- src Submodule -->
-	<details>
-		<summary><b>src</b></summary>
-		<blockquote>
-			<div class='directory-path' style='padding: 8px 0; color: #666;'>
-				<code><b>⦿ src</b></code>
-			<!-- obsidian_http_mcp Submodule -->
-			<details>
-				<summary><b>obsidian_http_mcp</b></summary>
-				<blockquote>
-					<div class='directory-path' style='padding: 8px 0; color: #666;'>
-						<code><b>⦿ src.obsidian_http_mcp</b></code>
-					<table style='width: 100%; border-collapse: collapse;'>
-					<thead>
-						<tr style='background-color: #f8f9fa;'>
-							<th style='width: 30%; text-align: left; padding: 8px;'>File Name</th>
-							<th style='text-align: left; padding: 8px;'>Summary</th>
-						</tr>
-					</thead>
-						<tr style='border-bottom: 1px solid #eee;'>
-							<td style='padding: 8px;'><b><a href='./obsidian-http-mcp/blob/master/src/obsidian_http_mcp/server.py'>server.py</a></b></td>
-							<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-						</tr>
-						<tr style='border-bottom: 1px solid #eee;'>
-							<td style='padding: 8px;'><b><a href='./obsidian-http-mcp/blob/master/src/obsidian_http_mcp/vault.py'>vault.py</a></b></td>
-							<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-						</tr>
-						<tr style='border-bottom: 1px solid #eee;'>
-							<td style='padding: 8px;'><b><a href='./obsidian-http-mcp/blob/master/src/obsidian_http_mcp/test'>test</a></b></td>
-							<td style='padding: 8px;'>Code>❯ REPLACE-ME</code></td>
-						</tr>
-					</table>
-				</blockquote>
-			</details>
-		</blockquote>
-	</details>
-</details>
-
----
-
 ## Getting Started
 
 ### Prerequisites
@@ -179,10 +90,13 @@ This project requires the following dependencies:
 - **Programming Language:** Python
 - **Package Manager:** Poetry
 - **Container Runtime:** Docker
+- **Secrets:** 
+  - VAULT_PATH
+  
 
 ### Installation
 
-Build obsidian-http-mcp from the source and intsall dependencies:
+Build obsidian-http-mcp from the source and install dependencies:
 
 1. **Clone the repository:**
 
@@ -197,50 +111,37 @@ Build obsidian-http-mcp from the source and intsall dependencies:
     ```
 
 3. **Install the dependencies:**
-
-<!-- SHIELDS BADGE CURRENTLY DISABLED -->
-	<!-- [![docker][docker-shield]][docker-link] -->
-	<!-- REFERENCE LINKS -->
-	<!-- [docker-shield]: https://img.shields.io/badge/Docker-2CA5E0.svg?style={badge_style}&logo=docker&logoColor=white -->
-	<!-- [docker-link]: https://www.docker.com/ -->
-
-	**Using [docker](https://www.docker.com/):**
-
-	```sh
-	❯ ./scripts/docker_run.sh
-	```
-<!-- SHIELDS BADGE CURRENTLY DISABLED -->
-	<!-- [![poetry][poetry-shield]][poetry-link] -->
-	<!-- REFERENCE LINKS -->
-	<!-- [poetry-shield]: https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json -->
-	<!-- [poetry-link]: https://python-poetry.org/ -->
-
-	**Using [poetry](https://python-poetry.org/):**
-
 	```sh
 	❯ poetry install
-	```
 
 ### Usage
 
 Run the project with:
 
 **Using [docker](https://www.docker.com/):**
-```sh
-docker run -it {image_name}
-```
-**Using [poetry](https://python-poetry.org/):**
-```sh
-poetry run python {entrypoint}
-```
+
+	```sh
+	./scripts/docker_run.sh
+	```
 
 ### Testing
 
-Obsidian-http-mcp uses the {__test_framework__} test framework. Run the test suite with:
+### Unit tests
+
+Obsidian-http-mcp uses the **pytest** test framework. Run the test suite with:
 
 ```sh
   source .venv/bin/activate
   pytest ./tests/test_mcp.py -v
+```
+
+### Manual test client
+
+It is possible to test Obsidian-http-mcp using a Python test client.
+
+```sh
+  source .venv/bin/activate
+  tests/python-client.py
 ```
 
 ---
@@ -294,10 +195,6 @@ Obsidian-http-mcp is protected under the [LICENSE](https://choosealicense.com/li
 
 ---
 
-## Acknowledgments
-
-- Credit `contributors`, `inspiration`, `references`, etc.
-
 <div align="right">
 
 [![][back-to-top]](#top)
@@ -309,26 +206,3 @@ Obsidian-http-mcp is protected under the [LICENSE](https://choosealicense.com/li
 
 
 ---
-
-# My obsidian mcp server using http protocoll
-WORK IN PROGRESS!!
-
-## Current project state:
-Local mcp server running in a docker container which can be accessed from a python client outside the container.
-
-## Purpose
-Because I can not find one I build one myself.
-
-The purpose of this mcp is to run on my remote server and connect the obsidian notes from my server to different AI client on multiple machines.
-
-## Prerequisites
-
-### mcp server
-- docker 
-- '.env' file containing the following secrets:
-  - VAULT_PATH: absolute path to your obsidian vault
-
-### local test
-- python
-- pip install fastmcp
-
