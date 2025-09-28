@@ -61,7 +61,14 @@ def append_content(filename: str, content: str) -> str:
 
 @mcp.tool
 def patch_content(filename: str, content: str, position: dict) -> str:
-    """Patch given content to a specific file at a specific position. The postiont could be a heading, block or frontmatter."""
+    """
+    Patch given content to a specific file at a specific position.
+    The postiont could be a heading, block or frontmatter.
+    "filename": filename,
+    "content": "new content",
+    "position": {"type": "heading/block", "value": "Tasks", "mode": "before/after"},
+    "position": {"type": "frontmatter", "value": "Tasks", "mode": "add/replace"},
+    """
     return VAULT.patch_content(filename, content, position)
 
 

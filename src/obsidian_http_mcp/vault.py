@@ -94,7 +94,9 @@ class Vault:
 
         elif position["type"] == "frontmatter":
             if lines[0].strip() == "---":
-                end = next(i for i, l in enumerate(lines[1:], 1) if l.strip() == "---")
+                end = next(
+                    i for i, line in enumerate(lines[1:], 1) if line.strip() == "---"
+                )
                 frontmatter = "\n".join(lines[1:end])
                 data = yaml.safe_load(frontmatter) or {}
                 key = position["value"]
