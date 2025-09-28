@@ -1,14 +1,16 @@
 from fastmcp import FastMCP
-from pathlib import Path
 from dotenv import load_dotenv
 import os
 
 from vault import Vault
+from authentication import UserAuthMiddleware
 
 # ------------------------
 # Load environment
 # ------------------------
 load_dotenv()
+
+vault_path = os.getenv("VAULT_PATH")
 
 # ------------------------
 # MCP server
@@ -21,13 +23,12 @@ mcp = FastMCP(
     """,
 )
 
-vault_path = os.getenv("VAULT_PATH")
-VAULT = Vault(vault_path)
-
+mcp.add_middleware(UserAuthMiddleware())
 
 # ------------------------
 # MCP tools
 # ------------------------
+VAULT = Vault(vault_path)
 
 
 @mcp.tool
