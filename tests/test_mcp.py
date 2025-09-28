@@ -146,7 +146,7 @@ async def test_get_note(mcp_client):
 async def test_append_to_existing_note(mcp_client):
     # Append content to the existing sample note
     result = await mcp_client.call_tool(
-        "append_content", {"filename": sample_filename, "content": "extra line"}
+        "append_content", {"filepath": sample_filename, "content": "extra line"}
     )
     assert "test.md" in result.content[0].text  # returns the path
 
@@ -166,7 +166,7 @@ async def test_append_creates_new_note(mcp_client):
 
     # Append to a note that doesn’t exist yet (should create it)
     result = await mcp_client.call_tool(
-        "append_content", {"filename": new_filename, "content": new_content}
+        "append_content", {"filepath": new_filename, "content": new_content}
     )
     assert "new_note.md" in result.content[0].text
 
@@ -179,7 +179,7 @@ async def test_append_creates_new_note(mcp_client):
 @pytest.mark.asyncio
 async def test_patch_content_heading(mcp_client):
     # Create a note with headings
-    filename = "heading_note.md"
+    filepath = "heading_note.md"
     initial_content = """# My Note
 
 ## Tasks
@@ -190,22 +190,24 @@ async def test_patch_content_heading(mcp_client):
 """
     # Write it into the vault
     result = await mcp_client.call_tool(
-        "append_content", {"filename": filename, "content": initial_content}
+        "append_content", {"filepath": filepath, "content": initial_content}
     )
 
-    # Patch after heading "Tasks" (ignore heading level)
+    # Patch: append after heading "Tasks" (ignoring heading level)
     result = await mcp_client.call_tool(
         "patch_content",
         {
-            "filename": filename,
+            "filepath": filepath,
+            "operation": "append",
+            "target_type": "heading",
+            "target": "Tasks",
             "content": "- [ ] new task",
-            "position": {"type": "heading", "value": "Tasks", "mode": "after"},
         },
     )
-    assert filename in result.content[0].text
+    assert filepath in result.content[0].text
 
     # Verify the updated note contains new task under Tasks
-    result = await mcp_client.call_tool("get_file_contents", {"filename": filename})
+    result = await mcp_client.call_tool("get_file_contents", {"filename": filepath})
     content = result.content[0].text
     assert "- [ ] new task" in content
 

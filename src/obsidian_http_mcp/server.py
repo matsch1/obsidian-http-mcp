@@ -1,6 +1,8 @@
 from fastmcp import FastMCP
 from dotenv import load_dotenv
 import os
+from typing import Annotated
+from pydantic import Field
 
 from vault import Vault
 from authentication import UserAuthMiddleware
@@ -38,38 +40,87 @@ def list_files_in_vault() -> list[str]:
 
 
 @mcp.tool
-def list_files_in_dir(dir: str) -> list[str]:
+def list_files_in_dir(
+    dir: Annotated[
+        str,
+        Field(description="direcotry path in vault. Path is relative to vault path"),
+    ],
+) -> list[str]:
     """List all notes in a specific directory of the vault."""
     return VAULT.list_files_in_dir(dir)
 
 
 @mcp.tool
-def get_file_contents(filename: str, debug: bool = False):
+def get_file_contents(
+    filename: Annotated[
+        str,
+        Field(
+            description="filename of note (without path)",
+        ),
+    ],
+):
     """Return the full text of a note by filename (searches vault)."""
-    result = VAULT.get_file_contents(filename, debug=debug)
-    if debug:
-        content, dbg = result
-        return {"content": content, "debug": dbg}
+    result = VAULT.get_file_contents(filename)
     return result
 
 
 @mcp.tool
-def append_content(filename: str, content: str) -> str:
+def append_content(
+    filepath: Annotated[
+        str,
+        Field(
+            description="filepath (relative to vault path) of file which should be changed",
+        ),
+    ],
+    content: Annotated[
+        str,
+        Field(
+            description="new content",
+        ),
+    ],
+) -> str:
     """Append given content to a specific file. Create file if it does not exist"""
-    return VAULT.append_content(filename, content)
+    return VAULT.append_content(filepath, content)
 
 
 @mcp.tool
-def patch_content(filename: str, content: str, position: dict) -> str:
+def patch_content(
+    filepath: Annotated[
+        str,
+        Field(
+            description="filepath (relative to vault path) of file which should be changed",
+        ),
+    ],
+    operation: Annotated[
+        str,
+        Field(
+            description="operation how to insert new content: append, prepend",
+        ),
+    ],
+    target_type: Annotated[
+        str,
+        Field(
+            description="type where the new content should be added: heading, block, frontmatter",
+        ),
+    ],
+    target: Annotated[
+        str,
+        Field(
+            description="name of the target where the new content should be added: heading name e.g. Tasks",
+        ),
+    ],
+    content: Annotated[
+        str,
+        Field(
+            description="new content",
+        ),
+    ],
+) -> str:
     """
-    Patch given content to a specific file at a specific position.
-    The postiont could be a heading, block or frontmatter.
-    "filename": filename,
-    "content": "new content",
-    "position": {"type": "heading/block", "value": "Tasks", "mode": "before/after"},
-    "position": {"type": "frontmatter", "value": "Tasks", "mode": "add/replace"},
+    Insert or update content in an Obsidian note relative to a heading, block reference, or frontmatter field.
     """
-    return VAULT.patch_content(filename, content, position)
+    VAULT.patch_content(filepath, operation, target_type, target, content)
+    return f"Successfully patched content in {filepath}"
 
 
 # @mcp.tool
