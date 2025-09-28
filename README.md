@@ -140,7 +140,7 @@ Run the sever with:
     }
   }
 }
-	```
+```
  
 **Python Client**
 See example of testing python client [python-client](#manual-test-client)
