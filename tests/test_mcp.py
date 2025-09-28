@@ -3,9 +3,21 @@ import time
 import tempfile
 import shutil
 import json
+import os
 from pathlib import Path
 import pytest
 from fastmcp import Client
+from dotenv import load_dotenv
+
+#
+#
+# ------------------------
+# Load environment
+# ------------------------
+load_dotenv()
+
+MCP_API_KEY = os.getenv("MCP_API_KEY")
+MCP_USER = os.getenv("MCP_USER")
 
 
 # Global variables for the temporary vault
@@ -17,17 +29,15 @@ sample_filename = "test.md"
 def mcp_docker():
     global VAULT_DIR
 
-    # Create temporary vault
     VAULT_DIR = tempfile.mkdtemp()
     testdir = Path(VAULT_DIR) / "testdir"
     testdir.mkdir(parents=True, exist_ok=True)
 
-
     sample_note = Path(VAULT_DIR) / sample_filename
     sample_note2 = Path(VAULT_DIR) / "file2.md"
     sample_note3 = Path(VAULT_DIR) / "file3.md"
-    sample_note4 = Path(VAULT_DIR) /"testdir"/"file4.md" 
-    sample_note5 = Path(VAULT_DIR) /"testdir"/"file5.md"
+    sample_note4 = Path(VAULT_DIR) / "testdir" / "file4.md"
+    sample_note5 = Path(VAULT_DIR) / "testdir" / "file5.md"
 
     # Actually write all files
     sample_note.write_text("test_content", encoding="utf-8")
@@ -35,7 +45,6 @@ def mcp_docker():
     sample_note3.write_text("content of file 3", encoding="utf-8")
     sample_note4.write_text("content of file 4", encoding="utf-8")
     sample_note5.write_text("content of file 5", encoding="utf-8")
-
 
     # Remove old Docker container and image if it exists
     subprocess.run(["docker", "rm", "-f", "mcp_test", "."], check=True)
@@ -52,6 +61,10 @@ def mcp_docker():
             "-d",
             "--name",
             "mcp_test",
+            "-e",
+            f"MCP_API_KEY={MCP_API_KEY}",
+            "-e",
+            f"MCP_USER={MCP_USER}",
             "-v",
             f"{VAULT_DIR}:/vault",
             "-p",
@@ -80,7 +93,14 @@ def mcp_docker():
 @pytest.fixture
 async def mcp_client(mcp_docker):
     """Provide an MCP client connected to the test server"""
-    client = Client("http://localhost:9001/mcp")
+    # Load client config
+    with open("client_config.json") as f:
+        json_data = f.read()
+
+    config = json.loads(json_data)
+
+    # start client
+    client = Client(config)
     async with client:
         yield client
 
@@ -95,7 +115,14 @@ async def test_list_files_in_vault(mcp_client):
     print(sorted(file_list))
 
     assert len(file_list) == 5
-    assert sorted(file_list) == ["file2.md", "file3.md", "test.md", "testdir/file4.md", "testdir/file5.md"]
+    assert sorted(file_list) == [
+        "file2.md",
+        "file3.md",
+        "test.md",
+        "testdir/file4.md",
+        "testdir/file5.md",
+    ]
+
 
 @pytest.mark.asyncio
 async def test_list_files_in_dir(mcp_client):
@@ -109,20 +136,24 @@ async def test_list_files_in_dir(mcp_client):
 
 @pytest.mark.asyncio
 async def test_get_note(mcp_client):
-    result = await mcp_client.call_tool("get_file_contents", {"filename": sample_filename})
+    result = await mcp_client.call_tool(
+        "get_file_contents", {"filename": sample_filename}
+    )
     assert "test_content" in result.content[0].text
+
 
 @pytest.mark.asyncio
 async def test_append_to_existing_note(mcp_client):
     # Append content to the existing sample note
     result = await mcp_client.call_tool(
-        "append_content",
-        {"filename": sample_filename, "content": "extra line"}
+        "append_content", {"filename": sample_filename, "content": "extra line"}
     )
     assert "test.md" in result.content[0].text  # returns the path
 
     # Fetch the updated note and verify new content
-    result = await mcp_client.call_tool("get_file_contents", {"filename": sample_filename})
+    result = await mcp_client.call_tool(
+        "get_file_contents", {"filename": sample_filename}
+    )
     content = result.content[0].text
     assert "test_content" in content
     assert "extra line" in content
@@ -135,8 +166,7 @@ async def test_append_creates_new_note(mcp_client):
 
     # Append to a note that doesn’t exist yet (should create it)
     result = await mcp_client.call_tool(
-        "append_content",
-        {"filename": new_filename, "content": new_content}
+        "append_content", {"filename": new_filename, "content": new_content}
     )
     assert "new_note.md" in result.content[0].text
 
@@ -144,6 +174,7 @@ async def test_append_creates_new_note(mcp_client):
     result = await mcp_client.call_tool("get_file_contents", {"filename": new_filename})
     content = result.content[0].text
     assert new_content in content
+
 
 @pytest.mark.asyncio
 async def test_patch_content_heading(mcp_client):
@@ -159,8 +190,7 @@ async def test_patch_content_heading(mcp_client):
 """
     # Write it into the vault
     result = await mcp_client.call_tool(
-        "append_content",
-        {"filename": filename, "content": initial_content}
+        "append_content", {"filename": filename, "content": initial_content}
     )
 
     # Patch after heading "Tasks" (ignore heading level)
@@ -169,8 +199,8 @@ async def test_patch_content_heading(mcp_client):
         {
             "filename": filename,
             "content": "- [ ] new task",
-            "position": {"type": "heading", "value": "Tasks", "mode": "after"}
-        }
+            "position": {"type": "heading", "value": "Tasks", "mode": "after"},
+        },
     )
     assert filename in result.content[0].text
 
@@ -184,4 +214,3 @@ async def test_patch_content_heading(mcp_client):
     urgent_index = content.index("### Urgent")
     new_task_index = content.index("- [ ] new task")
     assert tasks_index < new_task_index < urgent_index
-

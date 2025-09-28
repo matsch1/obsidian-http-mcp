@@ -1,4 +1,4 @@
 .env
 .venv/
 *cache*/
-client_secret.json
+client_config.json

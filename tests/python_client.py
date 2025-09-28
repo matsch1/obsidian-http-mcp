@@ -11,9 +11,32 @@ Intended for manual testing and development only, not for production use.
 
 import asyncio
 import json
+import os
 from fastmcp import Client
+from dotenv import load_dotenv
 
-client = Client("http://localhost:9001/mcp")
+#
+# ------------------------
+# Load environment
+# ------------------------
+load_dotenv()
+
+MCP_API_KEY = os.getenv("MCP_API_KEY")
+MCP_USER = os.getenv("MCP_USER")
+
+
+#
+# ------------------------
+# Client
+# ------------------------
+# Load client config
+with open("client_config.json") as f:
+    json_data = f.read()
+
+config = json.loads(json_data)
+
+# start client
+client = Client(config)
 
 
 async def main():
@@ -32,8 +55,11 @@ async def main():
 
         # Call get_note tool on the first note (if any exist)
         note2get = "Obsidian"
-        note_result = await client.call_tool("get_file_contents", {"filename": note2get})
+        note_result = await client.call_tool(
+            "get_file_contents", {"filename": note2get}
+        )
         print(note_result.content[0].text)  # actual note
+
 
 if __name__ == "__main__":
     asyncio.run(main())
