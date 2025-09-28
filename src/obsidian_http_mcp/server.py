@@ -16,7 +16,7 @@ vault_path = os.getenv("VAULT_PATH")
 # MCP server
 # ------------------------
 mcp = FastMCP(
-    name="obsidian-fast",
+    name="obsidian-http-mcp",
     instructions="""
         Headless Obsidian MCP server.
         Provides tools to read, edit, and search notes directly in the vault.
@@ -32,17 +32,14 @@ VAULT = Vault(vault_path)
 
 
 @mcp.tool
-def list_files_in_vault(
-    name="list_files_in_vault",
-    description="List all note paths in the obsidian vault.",
-) -> list[str]:
+def list_files_in_vault() -> list[str]:
     """List all notes in the vault."""
     return VAULT.list_files_in_vault()
 
 
 @mcp.tool
 def list_files_in_dir(dir: str) -> list[str]:
-    """List all notes in the vault."""
+    """List all notes in a specific directory of the vault."""
     return VAULT.list_files_in_dir(dir)
 
 
@@ -58,13 +55,13 @@ def get_file_contents(filename: str, debug: bool = False):
 
 @mcp.tool
 def append_content(filename: str, content: str) -> str:
-    """List all notes in the vault."""
+    """Append given content to a specific file. Create file if it does not exist"""
     return VAULT.append_content(filename, content)
 
 
 @mcp.tool
 def patch_content(filename: str, content: str, position: dict) -> str:
-    """List all notes in the vault."""
+    """Patch given content to a specific file at a specific position. The postiont could be a heading, block or frontmatter."""
     return VAULT.patch_content(filename, content, position)
 
 
