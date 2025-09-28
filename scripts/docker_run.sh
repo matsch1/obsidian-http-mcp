@@ -12,4 +12,5 @@ docker run -d \
   -e MCP_API_KEY=$MCP_API_KEY \
   -e MCP_USER=$MCP_USER \
   -p 9001:9001 \
-  mcp:latest
+  -- restart unless-stopped \
+  obsidian-http-mcp:latest
