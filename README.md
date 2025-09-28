@@ -60,7 +60,7 @@ The purpose of this server is to provide MCP functionalities for obsidian from a
 
 - [x] Basic obsidian MCP functionalities exist.
 - [x] Run http server in a docker container and access it from AI client (Cursor).
-- [ ] Implementation of user authentication is done.
+- [x] Implementation of user authentication is done.
 - [ ] Advanced obsidian MCP functionalities exist.
 
 ---
@@ -71,16 +71,12 @@ The purpose of this server is to provide MCP functionalities for obsidian from a
 └── obsidian-http-mcp/
     ├── Dockerfile
     ├── README.md
-    ├── client_secret.json
-    ├── poetry.lock
     ├── pyproject.toml
     ├── scripts
     │   └── docker_run.sh
     ├── src
     │   └── obsidian_http_mcp
     └── tests
-        ├── __init__.py
-        ├── __pycache__
         ├── python_client.py
         └── test_mcp.py
 ```
@@ -96,6 +92,8 @@ This project requires the following dependencies:
 - **Container Runtime:** Docker
 - **Secrets:** 
   - VAULT_PATH
+  - MCP_API_KEY
+  - MCP_USER
   
 
 ### Installation
@@ -117,16 +115,36 @@ Build obsidian-http-mcp from the source and install dependencies:
 3. **Install the dependencies:**
 	```sh
 	❯ poetry install
+	```
 
 ### Usage
 
-Run the project with:
+### Server 
+Run the sever with:
 
 **Using [docker](https://www.docker.com/):**
+```sh
+	❯ ./scripts/docker_run.sh
+```
 
-	```sh
-	./scripts/docker_run.sh
+### Client 
+**Config.json - e.g. Cursor**
+ ```json
+{
+  "mcpServers": {
+    "obsidian-http-mcp": {
+      "transport": "http",
+      "url": "http://localhost:9001/mcp",
+      "headers": {
+        "Authorization": "Bearer <MCP_API_KEY>"
+      }
+    }
+  }
+}
 	```
+ 
+**Python Client**
+See example of testing python client [python-client](#manual-test-client)
 
 ### Testing
 
@@ -142,6 +160,7 @@ Obsidian-http-mcp uses the **pytest** test framework. Run the test suite with:
 ### Manual test client
 
 It is possible to test Obsidian-http-mcp using a Python test client.
+For authentication it is necessary to save a configuration file **client_config.json** (see #client)
 
 ```sh
   source .venv/bin/activate
