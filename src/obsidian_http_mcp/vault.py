@@ -53,9 +53,7 @@ class Vault:
 
         return absolut_path
 
-    def patch_content(
-        self, filepath: str, operation: str, target_type: str, target: str, content: str
-    ):
+    def patch_content(self, filepath: str, operation: str, target_type: str, target: str, content: str):
         if not filepath.endswith(".md"):
             filepath += ".md"
 
@@ -63,68 +61,86 @@ class Vault:
         if not file_path.exists():
             raise FileNotFoundError(f"{filepath} does not exist")
 
-        text = file_path.read_text(encoding="utf-8")
-        lines = text.splitlines()
+        lines = file_path.read_text(encoding="utf-8").splitlines()
 
-        if target_type == "heading":
-            anchor = target.lstrip("#").strip().lower()
-            for i, line in enumerate(lines):
-                if line.strip().startswith("##"):
-                    heading_text = line.lstrip("#").strip().lower()
-                    if heading_text == anchor:
-                        if operation == "prepend":
-                            lines.insert(i + 1, content + "\n" + lines[i + 1])
-                        elif operation == "append":
-                            lines.insert(i + 1, content)
-                        break
+        handlers = {
+            "heading": self._patch_heading,
+            "block": self._patch_block,
+            "frontmatter": self._patch_frontmatter,
+        }
 
-        elif target_type == "block":
-            # block references look like ^block-id
-            anchor = "^" + target.lstrip("^")
-            for i, line in enumerate(lines):
-                if anchor in line:
-                    if operation == "prepend":
-                        lines.insert(i, content)
-                    elif operation == "append":
-                        lines.insert(i + 1, content)
-                    elif operation == "replace":
-                        lines[i] = content
-                    break
+        if target_type not in handlers:
+            raise ValueError(f"Unknown target_type: {target_type}")
 
-        elif target_type == "frontmatter":
-            if lines and lines[0].strip() == "---":
-                end = next(
-                    i for i, line in enumerate(lines[1:], 1) if line.strip() == "---"
-                )
-                frontmatter = "\n".join(lines[1:end])
-                data = yaml.safe_load(frontmatter) or {}
-                if operation == "replace":
-                    data[target] = content
-                elif operation == "append":
-                    old = data.get(target, "")
-                    data[target] = str(old) + ("\n" if old else "") + content
-                elif operation == "prepend":
-                    old = data.get(target, "")
-                    data[target] = content + ("\n" if old else "") + str(old)
-                new_frontmatter = yaml.safe_dump(data, sort_keys=False).strip()
-                lines = ["---", new_frontmatter, "---"] + lines[end + 1 :]
+        lines = handlers[target_type](lines, operation, target, content)
 
-        new_text = "\n".join(lines) + "\n"
-        file_path.write_text(new_text, encoding="utf-8")
+        file_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
         return file_path
 
 
-# def add_tag(self, filename: str, tag: str):
-#     text = self.get_note(filename)
-#     updated = text.rstrip() + f"\n#{tag}\n"
-#     return self.write_note(filename, updated)
-#
-# def get_daily_note(self, date: datetime.date | None = None):
-#     if date is None:
-#         date = datetime.date.today()
-#     filename = f"{date.isoformat()}.md"
-#     file = self.path / filename
-#     if not file.exists():
-#         file.write_text(f"# {date.isoformat()}\n\n## Tasks\n", encoding="utf-8")
-#     return filename
+def _patch_heading(self, lines, operation, target, content):
+    anchor = target.lstrip("#").strip().lower()
+    matches = [
+        i for i, line in enumerate(lines)
+        if line.strip().startswith("#") and line.lstrip("#").strip().lower() == anchor
+    ]
+
+    if not matches:
+        raise ValueError(f"No heading '{target}' found")
+    if len(matches) > 1:
+        raise ValueError(f"Multiple headings '{target}' found. Must be unique.")
+
+    i = matches[0]
+
+    if operation == "prepend":
+        lines.insert(i + 1, content)
+    elif operation == "append":
+        lines.insert(i + 1, content)
+    elif operation == "replace":
+        new_lines = content.splitlines()
+        lines[i:i+1] = new_lines
+    return lines
+
+def _patch_block(self, lines, operation, target, content):
+    anchor = "^" + target.lstrip("^")
+    matches = [i for i, line in enumerate(lines) if anchor in line]
+
+    if not matches:
+        raise ValueError(f"No block '{target}' found")
+    if len(matches) > 1:
+        raise ValueError(f"Multiple blocks '{target}' found. Must be unique.")
+
+    i = matches[0]
+
+    if operation == "prepend":
+        lines.insert(i, content)
+    elif operation == "append":
+        lines.insert(i + 1, content)
+    elif operation == "replace":
+        new_lines = content.splitlines()
+        lines[i:i+1] = new_lines
+    return lines
+
+def _patch_frontmatter(self, lines, operation, target, content):
+    if not (lines and lines[0].strip() == "---"):
+        raise ValueError("No frontmatter found")
+
+    end = next((i for i, line in enumerate(lines[1:], 1) if line.strip() == "---"), None)
+    if end is None:
+        raise ValueError("Frontmatter not properly closed with '---'")
+
+    frontmatter = "\n".join(lines[1:end])
+    data = yaml.safe_load(frontmatter) or {}
+
+    old = data.get(target, "")
+    if operation == "replace":
+        data[target] = content
+    elif operation == "append":
+        data[target] = str(old) + ("\n" if old else "") + content
+    elif operation == "prepend":
+        data[target] = content + ("\n" if old else "") + str(old)
+
+    new_frontmatter = yaml.safe_dump(data, sort_keys=False).strip()
+    return ["---", new_frontmatter, "---"] + lines[end + 1 :]
+

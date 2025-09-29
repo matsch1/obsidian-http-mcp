@@ -79,7 +79,8 @@ def append_content(
         ),
     ],
 ) -> str:
-    """Append given content to a specific file. Create file if it does not exist"""
+    """Adds content to the end of the given file.
+    If the file does not exist a new file (with the given content) is created."""
     return VAULT.append_content(filepath, content)
 
 
@@ -116,8 +117,9 @@ def patch_content(
         ),
     ],
 ) -> str:
-    """
-    Insert or update content in an Obsidian note relative to a heading, block reference, or frontmatter field.
+    """Adds content to a specific position (target) of the given file.
+    The target could be unique headings, blocks or the frontmatter.
+    If no specific position is required use the append_content tool.
     """
     VAULT.patch_content(filepath, operation, target_type, target, content)
     return f"Successfully patched content in {filepath}"
