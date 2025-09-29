@@ -41,24 +41,68 @@ client = Client(config)
 
 async def main():
     async with client:
-        # Call list_notes tool
-        print("Notes in vault:")
-        notes_result = await client.call_tool("list_files_in_vault", {})
+        ################ Call list_notes tool
+        # print("Notes in vault:")
+        # notes_result = await client.call_tool("list_files_in_vault", {})
+        #
+        # # unwrap the content
+        # notes = notes_result.content[0].text if notes_result.content else "[]"
+        # # fastmcp usually encodes lists as JSON inside a text block
+        # notes = json.loads(notes)
+        #
+        # for note in notes:
+        #     print(" -", note)
 
-        # unwrap the content
-        notes = notes_result.content[0].text if notes_result.content else "[]"
-        # fastmcp usually encodes lists as JSON inside a text block
-        notes = json.loads(notes)
+        ############################ Call get_note tool on the first note (if any exist)
+        # note2get = "Obsidian"
+        # note_result = await client.call_tool(
+        #     "get_file_contents", {"filename": note2get}
+        # )
+        # print(note_result.content[0].text)  # actual note
 
-        for note in notes:
-            print(" -", note)
+        ############################# patch_content with test file
+        # note_result = await client.call_tool(
+        #     "get_file_contents", {"filename": "test folder/test mcp 1.md"}
+        # )
+        # print(note_result.content[0].text)  # actual note
+        # note_content = await client.call_tool(
+        #     "patch_content",
+        #     {
+        #         "filepath": "test folder/test mcp 1.md",
+        #         "operation": "append",
+        #         "target_type": "heading",
+        #         "target": "## new heading",
+        #         "content": "## new heading",
+        #     },
+        # )
+        # note_result = await client.call_tool(
+        #     "get_file_contents", {"filename": "test folder/test mcp 1.md"}
+        # )
+        # print(note_result.content[0].text)  # actual note
 
-        # Call get_note tool on the first note (if any exist)
-        note2get = "Obsidian"
-        note_result = await client.call_tool(
-            "get_file_contents", {"filename": note2get}
+        ####################### find file
+        # found_notes = await client.call_tool(
+        #     "find_file",
+        #     {
+        #         "directory": ".",
+        #         "query": "MCP",
+        #         "extensions": [".md"],
+        #         "threshold": 80,
+        #     },
+        # )
+        # print(found_notes.content[0].text)
+
+        ####################### search text
+        found_notes = await client.call_tool(
+            "search_text",
+            {
+                "directory": ".",
+                "query": "new content",
+                "extensions": [".md"],
+                "threshold": 90,
+            },
         )
-        print(note_result.content[0].text)  # actual note
+        print(found_notes.content[0].text)
 
 
 if __name__ == "__main__":

@@ -95,7 +95,7 @@ def patch_content(
     operation: Annotated[
         str,
         Field(
-            description="operation how to insert new content: append, prepend",
+            description="operation how to insert new content: append, prepend, replace",
         ),
     ],
     target_type: Annotated[
@@ -124,70 +124,66 @@ def patch_content(
     VAULT.patch_content(filepath, operation, target_type, target, content)
     return f"Successfully patched content in {filepath}"
 
+
 @mcp.tool
 def find_file(
     directory: Annotated[
         str,
-        Field(
-            description="root directory to search",
-        ),
+        Field(description="Root directory in vault to search"),
     ],
     query: Annotated[
         str,
-        Field(
-            description="filename to search for",
-        ),
+        Field(description="Filename or part of filename to search for"),
     ],
     extensions: Annotated[
-        str,
+        tuple[str, ...],
         Field(
-        description="optional tuple of extensions, e.g. ('.md', '.py'), default: '.md'",
+            description="Optional tuple of extensions, e.g. ['.md', '.py']",
+            default=[
+                ".md",
+            ],
         ),
     ],
     threshold: Annotated[
         int,
-        Field(
-            description="minimum similarity score (0–100)",
-        ),
+        Field(description="Minimum similarity score (0–100)", default=80),
     ],
-) -> list[str]:
-    """Search for files in a directory (including subdirectories) whose names
-    are similar to `query` based on a fuzzy match.
-    Returns list of file_path, starting with the most similar file
+) -> list[dict]:
+    """Search for files in a directory whose names are similar to `query`.
+    Returns a list of dicts with 'path' and 'score', sorted by descending score.
     """
-    return VAULT.find_file(directory,query,extensions,threshold)
+    return VAULT.find_file(directory, query, extensions, threshold)
+
 
 @mcp.tool
 def search_text(
     directory: Annotated[
         str,
-        Field(
-            description="root directory to search",
-        ),
+        Field(description="Root directory in vault to search"),
     ],
     query: Annotated[
         str,
-        Field(
-            description="search string (case-insensitive)",
-        ),
+        Field(description="Search string (case-insensitive)"),
     ],
     extensions: Annotated[
-        str,
+        tuple[str, ...],
         Field(
-        description="optional tuple of extensions, e.g. ('.md', '.py'), default: '.md'",
+            description="Optional tuple of extensions, e.g. ['.md', '.py']",
+            default=[".md"],
         ),
     ],
     threshold: Annotated[
         int,
-        Field(
-            description="minimum similarity score (0–100)",
-        ),
+        Field(description="Minimum similarity score (0–100)", default=80),
     ],
-) -> list[tuple[str, int]]:
-    """Fuzzy search for a query in all files under a directory.
-    Returns list of (file_path, score), starting with the most similar file
+) -> list[dict]:
     """
-    return VAULT.search_text(directory,query,extensions,threshold)
+    Fuzzy search for a query in all files under a directory.
+    Returns a list of dicts with keys 'path', 'line', 'text', 'score',
+    sorted by descending score.
+    """
+    return VAULT.search_text(directory, query, extensions, threshold)
+
 
 # @mcp.tool
 # def get_daily_note(date: str | None = None) -> str:
