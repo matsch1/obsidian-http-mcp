@@ -40,28 +40,28 @@ class Vault:
         if not filepath.endswith(".md"):
             filepath += ".md"
 
-        absolut_path = self.path / filepath
+        absolute_path = self.path / filepath
 
         # ensure parent directories exist
-        absolut_path.parent.mkdir(parents=True, exist_ok=True)
+        absolute_path.parent.mkdir(parents=True, exist_ok=True)
 
         # append the content with a newline before it
-        with absolut_path.open("a", encoding="utf-8") as f:
+        with absolute_path.open("a", encoding="utf-8") as f:
             if not content.endswith("\n"):
                 content += "\n"
             f.write(content)
 
-        return absolut_path
+        return absolute_path
 
     def patch_content(self, filepath: str, operation: str, target_type: str, target: str, content: str):
         if not filepath.endswith(".md"):
             filepath += ".md"
 
-        file_path = self.path / filepath
-        if not file_path.exists():
-            raise FileNotFoundError(f"{filepath} does not exist")
+        absolute_path = self.path / filepath
+        if not absolute_path.exists():
+            raise FileNotFoundError(f"{absolute_path} does not exist")
 
-        lines = file_path.read_text(encoding="utf-8").splitlines()
+        lines = absolute_path.read_text(encoding="utf-8").splitlines()
 
         handlers = {
             "heading": self._patch_heading,
@@ -74,9 +74,9 @@ class Vault:
 
         lines = handlers[target_type](lines, operation, target, content)
 
-        file_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        absolute_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-        return file_path
+        return absolute_path
 
 
 def _patch_heading(self, lines, operation, target, content):
