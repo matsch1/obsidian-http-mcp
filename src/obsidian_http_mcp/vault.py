@@ -1,3 +1,5 @@
+import os
+from rapidfuzz import fuzz
 from pathlib import Path
 from dotenv import load_dotenv
 import yaml
@@ -144,3 +146,46 @@ def _patch_frontmatter(self, lines, operation, target, content):
     new_frontmatter = yaml.safe_dump(data, sort_keys=False).strip()
     return ["---", new_frontmatter, "---"] + lines[end + 1 :]
 
+
+def find_file(directory: str, query: str, extensions=".md", threshold: int = 80):
+    root = Path(directory)
+    results = []
+    q = query.lower()
+
+    for file_path in root.rglob("*"):
+        if not file_path.is_file():
+            continue
+        if extensions and file_path.suffix not in extensions:
+            continue
+
+        # Compare the query with the filename only (not full path)
+        score = fuzz.partial_ratio(q, file_path.name.lower())
+        if score >= threshold:
+            results.append((str(file_path), score))
+
+    # Sort by score descending
+    results.sort(key=lambda x: -x[1])
+    return results
+
+
+def search_text(directory: str, query: str, extensions=".md", threshold: int = 80):
+    root = Path(directory)
+    results = []
+    q = query.lower()
+
+    for dirpath, _, filenames in os.walk(root):
+        for name in filenames:
+            if extensions and not name.endswith(extensions):
+                continue
+
+            file_path = Path(dirpath) / name
+            try:
+                with file_path.open("r", encoding="utf-8", errors="ignore") as f:
+                    for i, line in enumerate(f, 1):
+                        score = fuzz.partial_ratio(q, line.lower())
+                        if score >= threshold:
+                            results.append((str(file_path), i, line.strip(), score))
+            except Exception:
+                continue  # skip unreadable files
+
+    return results

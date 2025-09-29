@@ -124,6 +124,70 @@ def patch_content(
     VAULT.patch_content(filepath, operation, target_type, target, content)
     return f"Successfully patched content in {filepath}"
 
+@mcp.tool
+def find_file(
+    directory: Annotated[
+        str,
+        Field(
+            description="root directory to search",
+        ),
+    ],
+    query: Annotated[
+        str,
+        Field(
+            description="filename to search for",
+        ),
+    ],
+    extensions: Annotated[
+        str,
+        Field(
+        description="optional tuple of extensions, e.g. ('.md', '.py'), default: '.md'",
+        ),
+    ],
+    threshold: Annotated[
+        int,
+        Field(
+            description="minimum similarity score (0–100)",
+        ),
+    ],
+) -> list[str]:
+    """Search for files in a directory (including subdirectories) whose names
+    are similar to `query` based on a fuzzy match.
+    Returns list of file_path, starting with the most similar file
+    """
+    return VAULT.find_file(directory,query,extensions,threshold)
+
+@mcp.tool
+def search_text(
+    directory: Annotated[
+        str,
+        Field(
+            description="root directory to search",
+        ),
+    ],
+    query: Annotated[
+        str,
+        Field(
+            description="search string (case-insensitive)",
+        ),
+    ],
+    extensions: Annotated[
+        str,
+        Field(
+        description="optional tuple of extensions, e.g. ('.md', '.py'), default: '.md'",
+        ),
+    ],
+    threshold: Annotated[
+        int,
+        Field(
+            description="minimum similarity score (0–100)",
+        ),
+    ],
+) -> list[tuple[str, int]]:
+    """Fuzzy search for a query in all files under a directory.
+    Returns list of (file_path, score), starting with the most similar file
+    """
+    return VAULT.search_text(directory,query,extensions,threshold)
 
 # @mcp.tool
 # def get_daily_note(date: str | None = None) -> str:
