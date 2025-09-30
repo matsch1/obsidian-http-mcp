@@ -76,7 +76,7 @@ def create_note(
     """Creates empty note in the obsidian vault.
     The input filepath is relative to the obsidian vault.
     The return value is the absolute filepath of the new file"""
-    return VAULT.reate_note(filepath)
+    return VAULT.create_note(filepath)
 
 
 @mcp.tool
@@ -97,7 +97,7 @@ def append_content_to_note(
     """Adds content to the end of the given file.
     The input file path is relative to the obsidian vault.
     The return value is the absolute path of the changed file."""
-    return VAULT.append_content(filepath, content)
+    return VAULT.append_content_to_note(filepath, content)
 
 
 @mcp.tool
