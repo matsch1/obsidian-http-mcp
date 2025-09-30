@@ -163,7 +163,7 @@ class Vault:
         new_frontmatter = yaml.safe_dump(data, sort_keys=False).strip()
         return ["---", new_frontmatter, "---"] + lines[end + 1 :]
 
-    def find_file(
+    def find_note_in_vault(
         self,
         directory: str,
         query: str,
@@ -205,7 +205,7 @@ class Vault:
         # Sort by score descending
         return sorted(results, key=lambda x: x["score"], reverse=True)
 
-    def search_text(
+    def search_text_in_notes(
         self,
         directory: str,
         query: str,

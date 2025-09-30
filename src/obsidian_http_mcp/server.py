@@ -35,7 +35,7 @@ VAULT = Vault(vault_path)
 
 @mcp.tool
 def list_files_in_vault() -> list[str]:
-    """List all notes in the vault."""
+    """List all notes in the obsidian vault as list of string containing the vault relative paths"""
     return VAULT.list_files_in_vault()
 
 
@@ -46,7 +46,7 @@ def list_files_in_dir(
         Field(description="direcotry path in vault. Path is relative to vault path"),
     ],
 ) -> list[str]:
-    """List all notes in a specific directory of the vault."""
+    """List all notes in a specific directory of the obsidian vault."""
     return VAULT.list_files_in_dir(dir)
 
 
@@ -59,7 +59,7 @@ def get_file_contents(
         ),
     ],
 ):
-    """Return the full text of a note by filename (searches vault)."""
+    """Return the full text of a note in the vault by filename (searches vault)."""
     result = VAULT.get_file_contents(filename)
     return result
 
@@ -117,8 +117,8 @@ def patch_content(
         ),
     ],
 ) -> str:
-    """Adds content to a specific position (target) of the given file.
-    The target could be unique headings, blocks or the frontmatter.
+    """Adds content relative to a given target in the given note of the obsidian vault.
+    The target must be a unique heading, block or frontmatter.
     If no specific position is required use the append_content tool.
     """
     VAULT.patch_content(filepath, operation, target_type, target, content)
@@ -126,7 +126,7 @@ def patch_content(
 
 
 @mcp.tool
-def find_file(
+def find_note_in_vault(
     directory: Annotated[
         str,
         Field(description="Root directory in vault to search"),
@@ -149,17 +149,18 @@ def find_file(
         Field(description="Minimum similarity score (0–100)", default=80),
     ],
 ) -> list[dict]:
-    """Search for files in a directory whose names are similar to `query`.
+    """Searches for notes in a specific directory of the obsidian vault whose names are similar to `query`.
+    The files can be filter by file extension, default is only markdown files
     Returns a list of dicts with 'path' and 'score', sorted by descending score.
     """
-    return VAULT.find_file(directory, query, extensions, threshold)
+    return VAULT.find_note_in_vault(directory, query, extensions, threshold)
 
 
 @mcp.tool
-def search_text(
+def search_text_in_notes(
     directory: Annotated[
         str,
-        Field(description="Root directory in vault to search"),
+        Field(description="Directory in vault to search"),
     ],
     query: Annotated[
         str,
@@ -178,11 +179,12 @@ def search_text(
     ],
 ) -> list[dict]:
     """
-    Fuzzy search for a query in all files under a directory.
+    Fuzzy search for a given text in all notes under a given
+    directory.
     Returns a list of dicts with keys 'path', 'line', 'text', 'score',
     sorted by descending score.
     """
-    return VAULT.search_text(directory, query, extensions, threshold)
+    return VAULT.search_text_in_notes(directory, query, extensions, threshold)
 
 
 # @mcp.tool

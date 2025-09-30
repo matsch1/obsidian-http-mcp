@@ -81,20 +81,20 @@ async def main():
         # print(note_result.content[0].text)  # actual note
 
         ####################### find file
-        # found_notes = await client.call_tool(
-        #     "find_file",
-        #     {
-        #         "directory": ".",
-        #         "query": "MCP",
-        #         "extensions": [".md"],
-        #         "threshold": 80,
-        #     },
-        # )
-        # print(found_notes.content[0].text)
+        found_notes = await client.call_tool(
+            "find_note_in_vault",
+            {
+                "directory": ".",
+                "query": "MCP",
+                "extensions": [".md"],
+                "threshold": 80,
+            },
+        )
+        print(found_notes.content[0].text)
 
         ####################### search text
         found_notes = await client.call_tool(
-            "search_text",
+            "search_text_in_notes",
             {
                 "directory": ".",
                 "query": "new content",
