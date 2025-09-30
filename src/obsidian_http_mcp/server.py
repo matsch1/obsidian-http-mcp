@@ -46,7 +46,7 @@ def list_files_in_dir(
         Field(description="direcotry path in vault. Path is relative to vault path"),
     ],
 ) -> list[str]:
-    """List all notes in a specific directory of the obsidian vault."""
+    """List all notes in a directory relative to the obsidian vault."""
     return VAULT.list_files_in_dir(dir)
 
 
@@ -65,7 +65,22 @@ def get_file_contents(
 
 
 @mcp.tool
-def append_content(
+def create_note(
+    filepath: Annotated[
+        str,
+        Field(
+            description="filepath (relative to vault path) of file which is created",
+        ),
+    ],
+) -> str:
+    """Creates empty note in the obsidian vault.
+    The input filepath is relative to the obsidian vault.
+    The return value is the absolute filepath of the new file"""
+    return VAULT.reate_note(filepath)
+
+
+@mcp.tool
+def append_content_to_note(
     filepath: Annotated[
         str,
         Field(
@@ -80,12 +95,13 @@ def append_content(
     ],
 ) -> str:
     """Adds content to the end of the given file.
-    If the file does not exist a new file (with the given content) is created."""
+    The input file path is relative to the obsidian vault.
+    The return value is the absolute path of the changed file."""
     return VAULT.append_content(filepath, content)
 
 
 @mcp.tool
-def patch_content(
+def patch_content_into_note(
     filepath: Annotated[
         str,
         Field(
@@ -101,13 +117,13 @@ def patch_content(
     target_type: Annotated[
         str,
         Field(
-            description="type where the new content should be added: heading, block, frontmatter",
+            description="type where the new content should be added: heading, frontmatter, text",
         ),
     ],
     target: Annotated[
         str,
         Field(
-            description="name of the target where the new content should be added: heading name e.g. Tasks",
+            description="name of the target where the new content should be added: heading name e.g. ## Tasks",
         ),
     ],
     content: Annotated[
@@ -118,10 +134,13 @@ def patch_content(
     ],
 ) -> str:
     """Adds content relative to a given target in the given note of the obsidian vault.
-    The target must be a unique heading, block or frontmatter.
+    The target must be a unique heading, frontmatter or text.
+    - Headings are marked with # or multiple # and treated linewise
+    - The frontmatter is marked with --- and used to keep tags in yaml frontmatter
+    - Text can be every text snippet in the file (inline or multiline). The whole file is treated as one string including whitespaces and linebreaks.
     If no specific position is required use the append_content tool.
     """
-    VAULT.patch_content(filepath, operation, target_type, target, content)
+    VAULT.patch_content_into_note(filepath, operation, target_type, target, content)
     return f"Successfully patched content in {filepath}"
 
 

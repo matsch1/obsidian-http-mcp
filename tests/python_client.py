@@ -60,49 +60,50 @@ async def main():
         # )
         # print(note_result.content[0].text)  # actual note
 
-        ############################# patch_content with test file
-        # note_result = await client.call_tool(
-        #     "get_file_contents", {"filename": "test folder/test mcp 1.md"}
-        # )
-        # print(note_result.content[0].text)  # actual note
-        # note_content = await client.call_tool(
-        #     "patch_content",
-        #     {
-        #         "filepath": "test folder/test mcp 1.md",
-        #         "operation": "append",
-        #         "target_type": "heading",
-        #         "target": "## new heading",
-        #         "content": "## new heading",
-        #     },
-        # )
-        # note_result = await client.call_tool(
-        #     "get_file_contents", {"filename": "test folder/test mcp 1.md"}
-        # )
-        # print(note_result.content[0].text)  # actual note
+        ############################# patch content with test file
+        note_result = await client.call_tool(
+            "get_file_contents", {"filename": "test folder/test mcp 1.md"}
+        )
+        print(note_result.content[0].text)  # actual note
+        note_content = await client.call_tool(
+            "patch_content_into_note",
+            {
+                "filepath": "test folder/test mcp 1.md",
+                "operation": "append",
+                "target_type": "text",
+                "target": "dko diggidi diggidiasdf\ntest",
+                "content": "\nDubsidu",
+            },
+        )
+        note_result = await client.call_tool(
+            "get_file_contents", {"filename": "test folder/test mcp 1.md"}
+        )
+        print(note_result.content[0].text)  # actual note
 
         ####################### find file
-        found_notes = await client.call_tool(
-            "find_note_in_vault",
-            {
-                "directory": ".",
-                "query": "MCP",
-                "extensions": [".md"],
-                "threshold": 80,
-            },
-        )
-        print(found_notes.content[0].text)
+        # found_notes = await client.call_tool(
+        #     "find_note_in_vault",
+        #     {
+        #         "directory": ".",
+        #         "query": "MCP",
+        #         "extensions": [".md"],
+        #         "threshold": 80,
+        #     },
+        # )
+        # print(found_notes.content[0].text)
 
         ####################### search text
-        found_notes = await client.call_tool(
-            "search_text_in_notes",
-            {
-                "directory": ".",
-                "query": "new content",
-                "extensions": [".md"],
-                "threshold": 90,
-            },
-        )
-        print(found_notes.content[0].text)
+        # found_notes = await client.call_tool(
+        #     "search_text_in_notes",
+        #     {
+        #         "directory": ".",
+        #         "query": "new content",
+        #         "extensions": [".md"],
+        #         "threshold": 90,
+        #     },
+        # )
+        # print(found_notes.content[0].text)
+        #
 
 
 if __name__ == "__main__":

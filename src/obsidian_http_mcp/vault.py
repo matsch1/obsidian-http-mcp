@@ -1,4 +1,3 @@
-import os
 from rapidfuzz import fuzz
 from pathlib import Path
 from dotenv import load_dotenv
@@ -48,8 +47,7 @@ class Vault:
 
         raise FileNotFoundError(f"No note found for {filename}")
 
-    def append_content(self, filepath: str, content: str):
-        # append content to an existing or new note
+    def create_note(self, filepath: str):
         # normalize filename
         if not filepath.endswith(".md"):
             filepath += ".md"
@@ -59,6 +57,11 @@ class Vault:
         # ensure parent directories exist
         absolute_path.parent.mkdir(parents=True, exist_ok=True)
 
+        return absolute_path
+
+    def append_content_to_note(self, filepath: str, content: str):
+        absolute_path = self.path / filepath
+
         # append the content with a newline before it
         with absolute_path.open("a", encoding="utf-8") as f:
             if not content.endswith("\n"):
@@ -67,7 +70,7 @@ class Vault:
 
         return absolute_path
 
-    def patch_content(
+    def patch_content_into_note(
         self, filepath: str, operation: str, target_type: str, target: str, content: str
     ):
         if not filepath.endswith(".md"):
@@ -81,8 +84,8 @@ class Vault:
 
         handlers = {
             "heading": self._patch_heading,
-            "block": self._patch_block,
             "frontmatter": self._patch_frontmatter,
+            "text": self._patch_text,
         }
 
         if target_type not in handlers:
@@ -119,32 +122,23 @@ class Vault:
             lines[i : i + 1] = new_lines
         return lines
 
-    def _patch_block(self, lines, operation, target, content):
-        anchor = "^" + target.lstrip("^")
-        matches = [i for i, line in enumerate(lines) if anchor in line]
-
-        if not matches:
-            raise ValueError(f"No block '{target}' found")
-        if len(matches) > 1:
-            raise ValueError(f"Multiple blocks '{target}' found. Must be unique.")
-
-        i = matches[0]
-
-        if operation == "prepend":
-            lines.insert(i, content)
-        elif operation == "append":
-            lines.insert(i + 1, content)
-        elif operation == "replace":
-            new_lines = content.splitlines()
-            lines[i : i + 1] = new_lines
-        return lines
-
     def _patch_frontmatter(self, lines, operation, target, content):
+        # If no frontmatter exists, create a new one
         if not (lines and lines[0].strip() == "---"):
-            raise ValueError("No frontmatter found")
+            data = {}
+            if operation == "replace":
+                data[target] = content
+            elif operation == "append":
+                data[target] = content
+            elif operation == "prepend":
+                data[target] = content
+            new_frontmatter = yaml.safe_dump(data, sort_keys=False).strip()
+            return ["---", new_frontmatter, "---"] + lines
 
+        # Otherwise, modify existing frontmatter
         end = next(
-            (i for i, line in enumerate(lines[1:], 1) if line.strip() == "---"), None
+            (i for i, line in enumerate(lines[1:], 1) if line.strip() == "---"),
+            None,
         )
         if end is None:
             raise ValueError("Frontmatter not properly closed with '---'")
@@ -162,6 +156,26 @@ class Vault:
 
         new_frontmatter = yaml.safe_dump(data, sort_keys=False).strip()
         return ["---", new_frontmatter, "---"] + lines[end + 1 :]
+
+    def _patch_text(self, lines, operation, target, content):
+        text = "\n".join(lines)
+
+        matches = text.count(target)
+        if matches == 0:
+            raise ValueError(f"No text '{target}' found")
+        if matches > 1:
+            raise ValueError(
+                f"Multiple matches for text '{target}' found. Must be unique."
+            )
+
+        if operation == "replace":
+            text = text.replace(target, content, 1)
+        elif operation == "prepend":
+            text = text.replace(target, content + target, 1)
+        elif operation == "append":
+            text = text.replace(target, target + content, 1)
+
+        return text.splitlines()
 
     def find_note_in_vault(
         self,
