@@ -101,6 +101,29 @@ def append_content_to_note(
 
 
 @mcp.tool
+def delete_lines_from_note(
+    filepath: Annotated[
+        str,
+        Field(
+            description="filepath (relative to vault path) of file where lines should be deleted",
+        ),
+    ],
+    line_numbers: Annotated[
+        list[int],
+        Field(
+            description="list of line numbers to delete (1-based indexing)",
+        ),
+    ],
+) -> str:
+    """Deletes specific lines from a note in the obsidian vault.
+    Line numbers are 1-based (first line is 1).
+    Multiple lines can be deleted by passing a list of line numbers.
+    """
+    VAULT.delete_lines_from_note(filepath, line_numbers)
+    return f"Successfully deleted lines {line_numbers} from {filepath}"
+
+
+@mcp.tool
 def patch_content_into_note(
     filepath: Annotated[
         str,

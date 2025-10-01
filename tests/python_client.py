@@ -61,24 +61,24 @@ async def main():
         # print(note_result.content[0].text)  # actual note
 
         ############################# patch content with test file
-        note_result = await client.call_tool(
-            "get_file_contents", {"filename": "test folder/test mcp 1.md"}
-        )
-        print(note_result.content[0].text)  # actual note
-        note_content = await client.call_tool(
-            "patch_content_into_note",
-            {
-                "filepath": "test folder/test mcp 1.md",
-                "operation": "append",
-                "target_type": "text",
-                "target": "dko diggidi diggidiasdf\ntest",
-                "content": "\nDubsidu",
-            },
-        )
-        note_result = await client.call_tool(
-            "get_file_contents", {"filename": "test folder/test mcp 1.md"}
-        )
-        print(note_result.content[0].text)  # actual note
+        # note_result = await client.call_tool(
+        #     "get_file_contents", {"filename": "test folder/test mcp 1.md"}
+        # )
+        # print(note_result.content[0].text)  # actual note
+        # note_content = await client.call_tool(
+        #     "patch_content_into_note",
+        #     {
+        #         "filepath": "test folder/test mcp 1.md",
+        #         "operation": "append",
+        #         "target_type": "text",
+        #         "target": "dko diggidi diggidiasdf\ntest",
+        #         "content": "\nDubsidu",
+        #     },
+        # )
+        # note_result = await client.call_tool(
+        #     "get_file_contents", {"filename": "test folder/test mcp 1.md"}
+        # )
+        # print(note_result.content[0].text)  # actual note
 
         ####################### find file
         # found_notes = await client.call_tool(
@@ -104,6 +104,23 @@ async def main():
         # )
         # print(found_notes.content[0].text)
         #
+
+        ############################# patch content with test file
+        note_result = await client.call_tool(
+            "get_file_contents", {"filename": "test folder/test mcp 1.md"}
+        )
+        print(note_result.content[0].text)  # actual note
+        note_content = await client.call_tool(
+            "delete_lines_from_note",
+            {
+                "filepath": "test folder/test mcp 1.md",
+                "line_numbers": [2, 4],
+            },
+        )
+        note_result = await client.call_tool(
+            "get_file_contents", {"filename": "test folder/test mcp 1.md"}
+        )
+        print(note_result.content[0].text)  # actual note
 
 
 if __name__ == "__main__":

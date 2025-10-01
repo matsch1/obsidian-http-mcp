@@ -70,6 +70,24 @@ class Vault:
 
         return absolute_path
 
+    def delete_lines_from_note(self, filepath: str, line_numbers: list[int]):
+        if not filepath.endswith(".md"):
+            filepath += ".md"
+
+        absolute_path = self.path / filepath
+        if not absolute_path.exists():
+            raise FileNotFoundError(f"{absolute_path} does not exist")
+
+        lines = absolute_path.read_text(encoding="utf-8").splitlines()
+
+        # Filter out the lines that should be deleted
+        new_lines = [
+            line for i, line in enumerate(lines, start=1) if i not in line_numbers
+        ]
+
+        absolute_path.write_text("\n".join(new_lines) + "\n", encoding="utf-8")
+        return absolute_path
+
     def patch_content_into_note(
         self, filepath: str, operation: str, target_type: str, target: str, content: str
     ):
