@@ -229,16 +229,6 @@ def search_text_in_notes(
     return VAULT.search_text_in_notes(directory, query, extensions, threshold)
 
 
-# @mcp.tool
-# def get_daily_note(date: str | None = None) -> str:
-#     """Return today's (or given ISO date) daily note filename, creating it if necessary."""
-#     if date:
-#         d = datetime.date.fromisoformat(date)
-#     else:
-#         d = None
-#     return VAULT.get_daily_note(d)
-
-
 # ------------------------
 # Run server
 # ------------------------
