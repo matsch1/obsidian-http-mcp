@@ -67,6 +67,8 @@ class Vault:
 
         # append the content with a newline before it
         with absolute_path.open("a", encoding="utf-8") as f:
+            if not content.startswith("\n"):
+                content = "\n" + content
             if not content.endswith("\n"):
                 content += "\n"
             f.write(content)
