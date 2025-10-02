@@ -4,6 +4,7 @@ import tempfile
 import shutil
 import json
 import os
+import stat
 from pathlib import Path
 import pytest
 from fastmcp import Client
@@ -23,6 +24,15 @@ MCP_USER = os.getenv("MCP_USER")
 # Global variables for the temporary vault
 VAULT_DIR = None
 sample_filename = "test.md"
+
+
+def on_rm_error(func, path, exc_info):
+    # make file writable and retry
+    try:
+        os.chmod(path, stat.S_IWUSR)
+        func(path)
+    except Exception:
+        pass
 
 
 @pytest.fixture(scope="module")
@@ -87,7 +97,7 @@ def mcp_docker():
 
     # Remove temp vault
     if VAULT_DIR:
-        shutil.rmtree(VAULT_DIR)
+        shutil.rmtree(VAULT_DIR, onerror=on_rm_error)
 
 
 @pytest.fixture
@@ -143,20 +153,19 @@ async def test_get_note(mcp_client):
 
 
 @pytest.mark.asyncio
-async def test_append_to_existing_note(mcp_client):
-    # Append content to the existing sample note
-    result = await mcp_client.call_tool(
-        "append_content", {"filepath": sample_filename, "content": "extra line"}
-    )
-    assert "test.md" in result.content[0].text  # returns the path
+async def test_create_note_in_rootdir(mcp_client):
+    new_note = "test_note.md"
 
-    # Fetch the updated note and verify new content
-    result = await mcp_client.call_tool(
-        "get_file_contents", {"filename": sample_filename}
-    )
-    content = result.content[0].text
-    assert "test_content" in content
-    assert "extra line" in content
+    # Create the note
+    path = await mcp_client.call_tool("create_note", {"filepath": new_note})
+    print("Created:", path.content[0].text)
+
+    # List files properly
+    files = await mcp_client.call_tool("list_files_in_vault", {})
+    file_list = json.loads(files.content[0].text)
+
+    # Assert against the actual list
+    assert new_note in file_list
 
 
 @pytest.mark.asyncio

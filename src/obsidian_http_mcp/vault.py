@@ -57,6 +57,9 @@ class Vault:
         # ensure parent directories exist
         absolute_path.parent.mkdir(parents=True, exist_ok=True)
 
+        # actually create the file if it doesn't exist
+        absolute_path.touch(exist_ok=True)
+
         return absolute_path
 
     def append_content_to_note(self, filepath: str, content: str):
