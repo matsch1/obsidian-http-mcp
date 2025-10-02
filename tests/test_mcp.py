@@ -169,37 +169,49 @@ async def test_create_note_in_rootdir(mcp_client):
 
 
 @pytest.mark.asyncio
-async def test_append_creates_new_note(mcp_client):
-    new_filename = "new_note.md"
-    new_content = "this is a brand new note"
+async def test_create_note_in_subdir(mcp_client):
+    new_note = "test/testitest/test_note.md"
 
-    # Append to a note that doesn’t exist yet (should create it)
-    result = await mcp_client.call_tool(
-        "append_content", {"filepath": new_filename, "content": new_content}
-    )
-    assert "new_note.md" in result.content[0].text
+    # Create the note
+    path = await mcp_client.call_tool("create_note", {"filepath": new_note})
+    print("Created:", path.content[0].text)
 
-    # Fetch and check contents
-    result = await mcp_client.call_tool("get_file_contents", {"filename": new_filename})
-    content = result.content[0].text
-    assert new_content in content
+    # List files properly
+    files = await mcp_client.call_tool("list_files_in_vault", {})
+    file_list = json.loads(files.content[0].text)
+
+    # Assert against the actual list
+    assert new_note in file_list
 
 
 @pytest.mark.asyncio
-async def test_patch_content_heading(mcp_client):
-    # Create a note with headings
-    filepath = "heading_note.md"
-    initial_content = """# My Note
+async def test_append_content_to_empty_note(mcp_client):
+    new_note = "test_note.md"
+    new_content = "afdasdf asdff;aen"
 
-## Tasks
-- [ ] old task
+    # Create the note
+    path = await mcp_client.call_tool("create_note", {"filepath": new_note})
+    print("Created:", path.content[0].text)
 
-### Urgent
-- [ ] another
-"""
-    # Write it into the vault
-    result = await mcp_client.call_tool(
-        "append_content", {"filepath": filepath, "content": initial_content}
+    # Append content
+    path = await mcp_client.call_tool(
+        "append_content_to_note", {"filepath": new_note, "content": new_content}
+    )
+
+    # Get content
+    result = await mcp_client.call_tool("get_file_contents", {"filename": new_note})
+
+    # Assert
+    assert new_content in result.content[0].text
+
+
+@pytest.mark.asyncio
+async def test_append_content_to_nonempty_note(mcp_client):
+    new_content = "afdasdf asdff;aen"
+
+    # Append content
+    path = await mcp_client.call_tool(
+        "append_content_to_note", {"filepath": sample_filename, "content": new_content}
     )
 
     # Patch: append after heading "Tasks" (ignoring heading level)
