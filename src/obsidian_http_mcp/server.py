@@ -169,7 +169,7 @@ def patch_content_into_note(
 
 @mcp.tool
 def find_note_in_vault(
-    directory: Annotated[
+    dir: Annotated[
         str,
         Field(description="Root directory in vault to search"),
     ],
@@ -195,12 +195,12 @@ def find_note_in_vault(
     The files can be filter by file extension, default is only markdown files
     Returns a list of dicts with 'path' and 'score', sorted by descending score.
     """
-    return VAULT.find_note_in_vault(directory, query, extensions, threshold)
+    return VAULT.find_note_in_vault(dir, query, extensions, threshold)
 
 
 @mcp.tool
 def search_text_in_notes(
-    directory: Annotated[
+    dir: Annotated[
         str,
         Field(description="Directory in vault to search"),
     ],
@@ -226,7 +226,7 @@ def search_text_in_notes(
     Returns a list of dicts with keys 'path', 'line', 'text', 'score',
     sorted by descending score.
     """
-    return VAULT.search_text_in_notes(directory, query, extensions, threshold)
+    return VAULT.search_text_in_notes(dir, query, extensions, threshold)
 
 
 # ------------------------

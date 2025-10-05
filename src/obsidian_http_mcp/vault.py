@@ -205,7 +205,7 @@ class Vault:
 
     def find_note_in_vault(
         self,
-        directory: str,
+        dir: str,
         query: str,
         extensions: tuple[str, ...] = (".md",),
         threshold: int = 80,
@@ -225,9 +225,12 @@ class Vault:
             sorted by descending similarity.
         """
         # Resolve absolute path inside vault
-        root = (self.path / directory).resolve()
+        if dir[0] == "/":
+            root = (self.path / f".{dir}").resolve()
+        else:
+            root = (self.path / dir).resolve()
         if not root.exists() or not root.is_dir():
-            raise FileNotFoundError(f"Directory '{directory}' does not exist in vault")
+            raise FileNotFoundError(f"Directory '{dir}' does not exist in vault")
 
         query_lower = query.lower()
         results: list[dict] = []
@@ -247,7 +250,7 @@ class Vault:
 
     def search_text_in_notes(
         self,
-        directory: str,
+        dir: str,
         query: str,
         extensions: tuple[str, ...] = (".md",),
         threshold: int = 80,
@@ -265,9 +268,13 @@ class Vault:
             List of dicts with keys: 'path', 'line', 'text', 'score',
             sorted by descending similarity score.
         """
-        root = (self.path / directory).resolve()
+        # Resolve absolute path inside vault
+        if dir[0] == "/":
+            root = (self.path / f".{dir}").resolve()
+        else:
+            root = (self.path / dir).resolve()
         if not root.exists() or not root.is_dir():
-            raise FileNotFoundError(f"Directory '{directory}' does not exist in vault")
+            raise FileNotFoundError(f"Directory '{dir}' does not exist in vault")
 
         results = []
         query_lower = query.lower()
