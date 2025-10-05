@@ -61,19 +61,30 @@ class Vault:
         absolute_path.parent.mkdir(parents=True, exist_ok=True)
 
         # actually create the file if it doesn't exist
-        absolute_path.touch(exist_ok=True)
+        absolute_path.touch(exist_ok=False)
 
         return absolute_path
+
+    from pathlib import Path
 
     def append_content_to_note(self, filepath: str, content: str):
         absolute_path = self.path / filepath
 
-        # append the content with a newline before it
+        # Ensure parent directories exist
+        absolute_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Check if file already has content
+        file_not_empty = absolute_path.exists() and absolute_path.stat().st_size > 0
+
+        # Normalize content newlines
+        if not content.endswith("\n"):
+            content += "\n"
+
+        # Add leading newline only if file isn't empty
+        if file_not_empty and not content.startswith("\n"):
+            content = "\n" + content
+
         with absolute_path.open("a", encoding="utf-8") as f:
-            if not content.startswith("\n"):
-                content = "\n" + content
-            if not content.endswith("\n"):
-                content += "\n"
             f.write(content)
 
         return absolute_path

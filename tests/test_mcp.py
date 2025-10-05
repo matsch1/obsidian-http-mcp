@@ -8,6 +8,7 @@ import stat
 from pathlib import Path
 import pytest
 from fastmcp import Client
+from fastmcp.exceptions import ToolError
 from dotenv import load_dotenv
 
 #
@@ -199,6 +200,18 @@ async def test_create_note_in_rootdir(mcp_client):
 
 
 @pytest.mark.asyncio
+async def test_create_note_already_exists(mcp_client):
+    new_note = "test_create_note_already_exists"
+
+    # First call should succeed (create the file)
+    await mcp_client.call_tool("create_note", {"filepath": new_note})
+
+    # Second call should fail — fastmcp wraps the FileExistsError in ToolError
+    with pytest.raises(ToolError, match="File exists"):
+        await mcp_client.call_tool("create_note", {"filepath": new_note})
+
+
+@pytest.mark.asyncio
 async def test_create_note_in_subdir(mcp_client):
     new_note = "test/testitest/test_note.md"
 
@@ -216,7 +229,7 @@ async def test_create_note_in_subdir(mcp_client):
 
 @pytest.mark.asyncio
 async def test_append_content_to_empty_note(mcp_client):
-    new_note = "test_note.md"
+    new_note = "test_append_note.md"
     new_content = "afdasdf asdff;aen"
 
     # Create the note
@@ -232,7 +245,7 @@ async def test_append_content_to_empty_note(mcp_client):
     result = await mcp_client.call_tool("get_file_contents", {"filename": new_note})
 
     # Assert
-    assert new_content in result.content[0].text
+    assert new_content + "\n" == result.content[0].text
 
 
 @pytest.mark.asyncio
@@ -250,37 +263,37 @@ async def test_append_content_to_nonempty_note(mcp_client):
     )
 
     # Assert
-    assert "test_content" + "\n" + new_content in result.content[0].text
+    assert "test_content" + "\n" + new_content + "\n" == result.content[0].text
 
 
-# @pytest.mark.asyncio
-# async def test_delete_lines_from_note(mcp_client):
-#     new_note = "test_note.md"
-#     new_content = "line1\nline2\nline3\nline4"
-#
-#     # Create the note
-#     path = await mcp_client.call_tool("create_note", {"filepath": new_note})
-#     print("Created:", path.content[0].text)
-#
-#     # Append content
-#     path = await mcp_client.call_tool(
-#         "append_content_to_note", {"filepath": new_note, "content": new_content}
-#     )
-#
-#     # Delete lines
-#     path = await mcp_client.call_tool(
-#         "delete_lines_from_note", {"filepath": new_note, "line_numbers": [2, 3]}
-#     )
-#     print("Deleted: ", path.content[0].text)
-#
-#     # Get content
-#     result = await mcp_client.call_tool("get_file_contents", {"filename": new_note})
-#
-#     # Split lines
-#     lines = result.content[0].text.strip().splitlines()
-#
-#     # Assert
-#     assert lines == ["line1", "line4"]
+@pytest.mark.asyncio
+async def test_delete_lines_from_note(mcp_client):
+    new_note = "test_delete_note.md"
+    new_content = "line1\nline2\nline3\nline4"
+
+    # Create the note
+    path = await mcp_client.call_tool("create_note", {"filepath": new_note})
+    print("Created:", path.content[0].text)
+
+    # Append content
+    path = await mcp_client.call_tool(
+        "append_content_to_note", {"filepath": new_note, "content": new_content}
+    )
+
+    # Delete lines
+    path = await mcp_client.call_tool(
+        "delete_lines_from_note", {"filepath": new_note, "line_numbers": [2, 3]}
+    )
+    print("Deleted: ", path.content[0].text)
+
+    # Get content
+    result = await mcp_client.call_tool("get_file_contents", {"filename": new_note})
+
+    # Split lines
+    lines = result.content[0].text.strip().splitlines()
+
+    # Assert
+    assert lines == ["line1", "line4"]
 
 
 # @pytest.mark.asyncio
