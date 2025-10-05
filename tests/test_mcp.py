@@ -297,40 +297,6 @@ async def test_delete_lines_from_note(mcp_client):
 
 
 # @pytest.mark.asyncio
-# async def test_append_to_existing_note(mcp_client):
-#     # Append content to the existing sample note
-#     result = await mcp_client.call_tool(
-#         "append_content", {"filepath": sample_filename, "content": "extra line"}
-#     )
-#     assert "test.md" in result.content[0].text  # returns the path
-#
-#     # Fetch the updated note and verify new content
-#     result = await mcp_client.call_tool(
-#         "get_file_contents", {"filename": sample_filename}
-#     )
-#     content = result.content[0].text
-#     assert "test_content" in content
-#     assert "extra line" in content
-
-
-# @pytest.mark.asyncio
-# async def test_append_creates_new_note(mcp_client):
-#     new_filename = "new_note.md"
-#     new_content = "this is a brand new note"
-#
-#     # Append to a note that doesn’t exist yet (should create it)
-#     result = await mcp_client.call_tool(
-#         "append_content", {"filepath": new_filename, "content": new_content}
-#     )
-#     assert "new_note.md" in result.content[0].text
-#
-#     # Fetch and check contents
-#     result = await mcp_client.call_tool("get_file_contents", {"filename": new_filename})
-#     content = result.content[0].text
-#     assert new_content in content
-
-
-# @pytest.mark.asyncio
 # async def test_patch_content_heading(mcp_client):
 #     # Create a note with headings
 #     filepath = "heading_note.md"
