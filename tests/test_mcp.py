@@ -145,6 +145,36 @@ async def test_list_files_in_dir(mcp_client):
 
 
 @pytest.mark.asyncio
+async def test_list_files_in_root_dir(mcp_client):
+    result = await mcp_client.call_tool("list_files_in_dir", {"dir": "/"})
+    file_list = json.loads(result.content[0].text)
+    print(file_list)
+
+    vault_result = await mcp_client.call_tool("list_files_in_vault", {})
+    vault_file_list = json.loads(vault_result.content[0].text)
+    assert len(file_list) == len(vault_file_list)
+    assert sorted(file_list) == [
+        "file2.md",
+        "file3.md",
+        "test.md",
+        "testdir/file4.md",
+        "testdir/file5.md",
+    ]
+
+
+@pytest.mark.asyncio
+async def test_list_files_in_subroot_dir(mcp_client):
+    result = await mcp_client.call_tool("list_files_in_dir", {"dir": "/testdir"})
+    file_list = json.loads(result.content[0].text)
+    print(file_list)
+
+    ref_result = await mcp_client.call_tool("list_files_in_dir", {"dir": "testdir"})
+    ref_file_list = json.loads(ref_result.content[0].text)
+    assert len(file_list) == len(ref_file_list)
+    assert sorted(file_list) == ["file4.md", "file5.md"]
+
+
+@pytest.mark.asyncio
 async def test_get_note(mcp_client):
     result = await mcp_client.call_tool(
         "get_file_contents", {"filename": sample_filename}

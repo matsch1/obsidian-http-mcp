@@ -20,7 +20,10 @@ class Vault:
         return [str(f.relative_to(self.path)) for f in self.path.rglob("*.md")]
 
     def list_files_in_dir(self, dir: str):
-        dir_path = Path(self.path) / dir
+        if dir[0] == "/":
+            dir_path = Path(self.path) / f".{dir}"
+        else:
+            dir_path = Path(self.path) / dir
         return [str(f.relative_to(dir_path)) for f in dir_path.rglob("*.md")]
 
     def get_file_contents(self, filename: str):
