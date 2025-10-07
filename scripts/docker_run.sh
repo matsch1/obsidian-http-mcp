@@ -8,6 +8,7 @@ docker build -t mcp:latest .
 
 docker run -d \
   --name obsidian-http-mcp \
+  --network mcp \
   -v $VAULT_PATH:/vault \
   -e MCP_API_KEY=$MCP_API_KEY \
   -e MCP_USER=$MCP_USER \
