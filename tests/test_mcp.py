@@ -296,6 +296,52 @@ async def test_delete_lines_from_note(mcp_client):
     assert lines == ["line1", "line4"]
 
 
+@pytest.mark.asyncio
+async def test_patch_empty_frontmatter(mcp_client):
+    new_note = "test_patch_empty_frontmatter.md"
+    new_content = "line1\nline2\nline3\nline4"
+    test_tag = "test"
+
+    # Create the note
+    path = await mcp_client.call_tool("create_note", {"filepath": new_note})
+    print("Created:", path.content[0].text)
+    #
+    # Append content
+    path = await mcp_client.call_tool(
+        "append_content_to_note", {"filepath": new_note, "content": new_content}
+    )
+
+    # Append content (no operation needed, because no frontmatter exists)
+    path = await mcp_client.call_tool(
+        "patch_content_into_note",
+        {
+            "filepath": new_note,
+            "operation": "x",
+            "target_type": "frontmatter",
+            "target": "tags",
+            "content": test_tag,
+        },
+    )
+
+    # Get content
+    result = await mcp_client.call_tool("get_file_contents", {"filename": new_note})
+
+    # Split lines
+    lines = result.content[0].text.strip().splitlines()
+    print(lines)
+
+    # Assert
+    assert lines == [
+        "---",
+        "tags: " + test_tag,
+        "---",
+        "line1",
+        "line2",
+        "line3",
+        "line4",
+    ]
+
+
 # @pytest.mark.asyncio
 # async def test_patch_content_heading(mcp_client):
 #     # Create a note with headings

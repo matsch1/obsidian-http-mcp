@@ -110,15 +110,11 @@ class Vault:
     def patch_content_into_note(
         self, filepath: str, operation: str, target_type: str, target: str, content: str
     ):
-        if not filepath.endswith(".md"):
-            filepath += ".md"
-
-        absolute_path = self.path / filepath
-        if not absolute_path.exists():
-            raise FileNotFoundError(f"{absolute_path} does not exist")
+        absolute_path = self._resolve_markdown_path(filepath)
 
         lines = absolute_path.read_text(encoding="utf-8").splitlines()
 
+        # get patcher related to target_type
         handlers = {
             "heading": self._patch_heading,
             "frontmatter": self._patch_frontmatter,
@@ -128,9 +124,11 @@ class Vault:
         if target_type not in handlers:
             raise ValueError(f"Unknown target_type: {target_type}")
 
-        lines = handlers[target_type](lines, operation, target, content)
+        # patch content (lines split by newline with newline at the end of the file)
+        updated_lines = handlers[target_type](lines, operation, target, content)
 
-        absolute_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        # write to file
+        absolute_path.write_text("\n".join(updated_lines) + "\n", encoding="utf-8")
 
         return absolute_path
 
@@ -160,15 +158,10 @@ class Vault:
         return lines
 
     def _patch_frontmatter(self, lines, operation, target, content):
-        # If no frontmatter exists, create a new one
+        # If no frontmatter exists, create a new one (operation not needed)
         if not (lines and lines[0].strip() == "---"):
             data = {}
-            if operation == "replace":
-                data[target] = content
-            elif operation == "append":
-                data[target] = content
-            elif operation == "prepend":
-                data[target] = content
+            data[target] = content
             new_frontmatter = yaml.safe_dump(data, sort_keys=False).strip()
             return ["---", new_frontmatter, "---"] + lines
 
@@ -317,3 +310,15 @@ class Vault:
 
         # Sort by score descending
         return sorted(results, key=lambda x: x["score"], reverse=True)
+
+    # --- Helper methods ---
+
+    def _resolve_markdown_path(self, filepath: str):
+        """Ensure the path points to an existing Markdown file."""
+        if not filepath.endswith(".md"):
+            filepath += ".md"
+
+        absolute_path = self.path / filepath
+        if not absolute_path.exists():
+            raise FileNotFoundError(f"{absolute_path} does not exist")
+        return absolute_path
