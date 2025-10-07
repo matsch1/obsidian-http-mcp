@@ -131,22 +131,22 @@ def patch_content_into_note(
             description="filepath (relative to vault path) of file which should be changed",
         ),
     ],
-    operation: Annotated[
-        str,
-        Field(
-            description="operation how to insert new content: append, prepend, replace",
-        ),
-    ],
     target_type: Annotated[
         str,
         Field(
-            description="type where the new content should be added: heading, frontmatter, text",
+            description="differentiation between inline (target_type: text) edit and linewise (target_type: line) edit.",
         ),
     ],
     target: Annotated[
         str,
         Field(
             description="name of the target where the new content should be added: heading name e.g. ## Tasks",
+        ),
+    ],
+    operation: Annotated[
+        str,
+        Field(
+            description="operation how to insert new content: append, prepend, replace",
         ),
     ],
     content: Annotated[
@@ -157,13 +157,11 @@ def patch_content_into_note(
     ],
 ) -> str:
     """Adds content relative to a given target in the given note of the obsidian vault.
-    The target must be a unique heading, frontmatter or text.
-    - Headings are marked with # or multiple # and treated linewise
-    - The frontmatter is marked with --- and used to keep tags in yaml frontmatter
-    - Text can be every text snippet in the file (inline or multiline). The whole file is treated as one string including whitespaces and linebreaks.
-    If no specific position is required use the append_content tool.
+    The target must be a text snippet.
+    It can be used to manipulate frontmatter, text, headings, blocks, etc.
+    If no specific position is required use the append_content_to_note tool.
     """
-    VAULT.patch_content_into_note(filepath, operation, target_type, target, content)
+    VAULT.patch_content_into_note(filepath, target_type, target, operation, content)
     return f"Successfully patched content in {filepath}"
 
 

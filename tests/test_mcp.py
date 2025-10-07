@@ -253,7 +253,7 @@ async def test_append_content_to_nonempty_note(mcp_client):
     new_content = "afdasdf asdff;aen"
 
     # Append content
-    path = await mcp_client.call_tool(
+    await mcp_client.call_tool(
         "append_content_to_note", {"filepath": sample_filename, "content": new_content}
     )
 
@@ -297,29 +297,28 @@ async def test_delete_lines_from_note(mcp_client):
 
 
 @pytest.mark.asyncio
-async def test_patch_empty_frontmatter(mcp_client):
-    new_note = "test_patch_empty_frontmatter.md"
-    new_content = "line1\nline2\nline3\nline4"
-    test_tag = "test"
+async def test_patch_frontmatter_empty(mcp_client):
+    new_note = "test_patch_frontmatter_empty.md"
+    new_content = "line1\nline2\nline3\nline4\n"
+    test_tag = "tags: test"
 
     # Create the note
-    path = await mcp_client.call_tool("create_note", {"filepath": new_note})
-    print("Created:", path.content[0].text)
+    await mcp_client.call_tool("create_note", {"filepath": new_note})
     #
     # Append content
-    path = await mcp_client.call_tool(
+    await mcp_client.call_tool(
         "append_content_to_note", {"filepath": new_note, "content": new_content}
     )
 
-    # Append content (no operation needed, because no frontmatter exists)
-    path = await mcp_client.call_tool(
+    # Patch content
+    await mcp_client.call_tool(
         "patch_content_into_note",
         {
             "filepath": new_note,
-            "operation": "x",
-            "target_type": "frontmatter",
-            "target": "tags",
-            "content": test_tag,
+            "target_type": "line",
+            "target": "line1",
+            "operation": "prepend",
+            "content": "---\n" + test_tag + "\n---",
         },
     )
 
@@ -327,61 +326,357 @@ async def test_patch_empty_frontmatter(mcp_client):
     result = await mcp_client.call_tool("get_file_contents", {"filename": new_note})
 
     # Split lines
-    lines = result.content[0].text.strip().splitlines()
+    lines = result.content[0].text.splitlines()
     print(lines)
 
-    # Assert
-    assert lines == [
+    assert_string = [
         "---",
-        "tags: " + test_tag,
+        test_tag,
         "---",
         "line1",
         "line2",
         "line3",
         "line4",
+        "",
     ]
+    print(assert_string)
+
+    # Assert
+    assert lines == assert_string
 
 
-# @pytest.mark.asyncio
-# async def test_patch_content_heading(mcp_client):
-#     # Create a note with headings
-#     filepath = "heading_note.md"
-#     initial_content = """# My Note
-#
-# ## Tasks
-# - [ ] old task
-#
-# ### Urgent
-# - [ ] another
-# """
-#     # Write it into the vault
-#     result = await mcp_client.call_tool(
-#         "append_content", {"filepath": filepath, "content": initial_content}
-#     )
-#
-#     # Patch: append after heading "Tasks" (ignoring heading level)
-#     result = await mcp_client.call_tool(
-#         "patch_content",
-#         {
-#             "filepath": filepath,
-#             "operation": "append",
-#             "target_type": "heading",
-#             "target": "Tasks",
-#             "content": "- [ ] new task",
-#         },
-#     )
-#     assert filepath in result.content[0].text
-#
-#     # Verify the updated note contains new task under Tasks
-#     result = await mcp_client.call_tool("get_file_contents", {"filename": filepath})
-#     content = result.content[0].text
-#     assert "- [ ] new task" in content
-#
-#     # And it should appear before "### Urgent"
-#     tasks_index = content.index("## Tasks")
-#     urgent_index = content.index("### Urgent")
-#     new_task_index = content.index("- [ ] new task")
-#     assert tasks_index < new_task_index < urgent_index
+@pytest.mark.asyncio
+async def test_patch_prepend_text(mcp_client):
+    note = "test_patch_prepend_text.md"
+    content = "line1\nline2\nline3123\nline4\n"
+    new_content = "111"
+
+    # Create the note
+    await mcp_client.call_tool("create_note", {"filepath": note})
+    #
+    # Append content
+    await mcp_client.call_tool(
+        "append_content_to_note", {"filepath": note, "content": content}
+    )
+
+    # Patch content
+    await mcp_client.call_tool(
+        "patch_content_into_note",
+        {
+            "filepath": note,
+            "target_type": "text",
+            "target": "3123",
+            "operation": "prepend",
+            "content": new_content,
+        },
+    )
+
+    # Get content
+    result = await mcp_client.call_tool("get_file_contents", {"filename": note})
+
+    # Split lines
+    lines = result.content[0].text.splitlines()
+    print(lines)
+
+    assert_string = [
+        "line1",
+        "line2",
+        "line1113123",
+        "line4",
+        "",
+    ]
+    print(assert_string)
+
+    # Assert
+    assert lines == assert_string
+
+
+@pytest.mark.asyncio
+async def test_patch_append_text(mcp_client):
+    note = "test_patch_append_text.md"
+    content = "line1\nline2\nline3333\nline4\n"
+    new_content = "111"
+
+    # Create the note
+    await mcp_client.call_tool("create_note", {"filepath": note})
+    #
+    # Append content
+    await mcp_client.call_tool(
+        "append_content_to_note", {"filepath": note, "content": content}
+    )
+
+    # Patch content
+    await mcp_client.call_tool(
+        "patch_content_into_note",
+        {
+            "filepath": note,
+            "target_type": "text",
+            "target": "3333",
+            "operation": "append",
+            "content": new_content,
+        },
+    )
+
+    # Get content
+    result = await mcp_client.call_tool("get_file_contents", {"filename": note})
+
+    # Split lines
+    lines = result.content[0].text.splitlines()
+    print(lines)
+
+    assert_string = [
+        "line1",
+        "line2",
+        "line3333111",
+        "line4",
+        "",
+    ]
+    print(assert_string)
+
+    # Assert
+    assert lines == assert_string
+
+
+@pytest.mark.asyncio
+async def test_patch_replace_text(mcp_client):
+    note = "test_patch_replace_text.md"
+    content = "line1\nline2\nline3333\nline4\n"
+    new_content = "111"
+
+    # Create the note
+    await mcp_client.call_tool("create_note", {"filepath": note})
+    #
+    # Append content
+    await mcp_client.call_tool(
+        "append_content_to_note", {"filepath": note, "content": content}
+    )
+
+    # Patch content
+    await mcp_client.call_tool(
+        "patch_content_into_note",
+        {
+            "filepath": note,
+            "target_type": "text",
+            "target": "3333",
+            "operation": "replace",
+            "content": new_content,
+        },
+    )
+
+    # Get content
+    result = await mcp_client.call_tool("get_file_contents", {"filename": note})
+
+    # Split lines
+    lines = result.content[0].text.splitlines()
+    print(lines)
+
+    assert_string = [
+        "line1",
+        "line2",
+        "line111",
+        "line4",
+        "",
+    ]
+    print(assert_string)
+
+    # Assert
+    assert lines == assert_string
+
+
+@pytest.mark.asyncio
+async def test_patch_prepend_line(mcp_client):
+    note = "test_patch_prepend_line.md"
+    content = "line1\nline2\nline3\nline4\n"
+    new_content = "line_new"
+
+    # Create the note
+    await mcp_client.call_tool("create_note", {"filepath": note})
+    #
+    # Append content
+    await mcp_client.call_tool(
+        "append_content_to_note", {"filepath": note, "content": content}
+    )
+
+    # Patch content
+    await mcp_client.call_tool(
+        "patch_content_into_note",
+        {
+            "filepath": note,
+            "target_type": "line",
+            "target": "line2",
+            "operation": "prepend",
+            "content": new_content,
+        },
+    )
+
+    # Get content
+    result = await mcp_client.call_tool("get_file_contents", {"filename": note})
+
+    # Split lines
+    lines = result.content[0].text.splitlines()
+    print(lines)
+
+    assert_string = [
+        "line1",
+        "line_new",
+        "line2",
+        "line3",
+        "line4",
+        "",
+    ]
+    print(assert_string)
+
+    # Assert
+    assert lines == assert_string
+
+
+@pytest.mark.asyncio
+async def test_patch_append_line(mcp_client):
+    note = "test_patch_append_line.md"
+    content = "line1\nline2\nline3\nline4\n"
+    new_content = "line_new"
+
+    # Create the note
+    await mcp_client.call_tool("create_note", {"filepath": note})
+    #
+    # Append content
+    await mcp_client.call_tool(
+        "append_content_to_note", {"filepath": note, "content": content}
+    )
+
+    # Patch content
+    await mcp_client.call_tool(
+        "patch_content_into_note",
+        {
+            "filepath": note,
+            "target_type": "line",
+            "target": "line2",
+            "operation": "append",
+            "content": new_content,
+        },
+    )
+
+    # Get content
+    result = await mcp_client.call_tool("get_file_contents", {"filename": note})
+
+    # Split lines
+    lines = result.content[0].text.splitlines()
+    print(lines)
+
+    assert_string = [
+        "line1",
+        "line2",
+        "line_new",
+        "line3",
+        "line4",
+        "",
+    ]
+    print(assert_string)
+
+    # Assert
+    assert lines == assert_string
+
+
+@pytest.mark.asyncio
+async def test_patch_replace_line(mcp_client):
+    note = "test_patch_replace_line.md"
+    content = "line1\nline2\nline3\nline4\n"
+    new_content = "line_new"
+
+    # Create the note
+    await mcp_client.call_tool("create_note", {"filepath": note})
+    #
+    # Append content
+    await mcp_client.call_tool(
+        "append_content_to_note", {"filepath": note, "content": content}
+    )
+
+    # Patch content
+    await mcp_client.call_tool(
+        "patch_content_into_note",
+        {
+            "filepath": note,
+            "target_type": "line",
+            "target": "line2",
+            "operation": "replace",
+            "content": new_content,
+        },
+    )
+
+    # Get content
+    result = await mcp_client.call_tool("get_file_contents", {"filename": note})
+
+    # Split lines
+    lines = result.content[0].text.splitlines()
+    print(lines)
+
+    assert_string = [
+        "line1",
+        "line_new",
+        "line3",
+        "line4",
+        "",
+    ]
+    print(assert_string)
+
+    # Assert
+    assert lines == assert_string
+
+
+@pytest.mark.asyncio
+async def test_patch_illegal_target(mcp_client):
+    note = "test_patch_illegal_target.md"
+    content = "line1\nline2\nline3\nline4\n"
+    new_content = "line_new\n"
+
+    # Create the note
+    await mcp_client.call_tool("create_note", {"filepath": note})
+    #
+    # Append content
+    await mcp_client.call_tool(
+        "append_content_to_note", {"filepath": note, "content": content}
+    )
+
+    # Append content (no operation needed, because no frontmatter exists)
+    with pytest.raises(ToolError, match="No text"):
+        await mcp_client.call_tool(
+            "patch_content_into_note",
+            {
+                "filepath": note,
+                "target_type": "line",
+                "target": "line20",
+                "operation": "replace",
+                "content": new_content,
+            },
+        )
+
+
+@pytest.mark.asyncio
+async def test_patch_nonunique_target(mcp_client):
+    note = "test_patch_nonunique_target.md"
+    content = "line1\nline4\nline3\nline4\n"
+    new_content = "line_new\n"
+
+    # Create the note
+    await mcp_client.call_tool("create_note", {"filepath": note})
+    #
+    # Append content
+    await mcp_client.call_tool(
+        "append_content_to_note", {"filepath": note, "content": content}
+    )
+
+    # Append content (no operation needed, because no frontmatter exists)
+    with pytest.raises(ToolError, match="Multiple matches"):
+        await mcp_client.call_tool(
+            "patch_content_into_note",
+            {
+                "filepath": note,
+                "target_type": "line",
+                "target": "line4",
+                "operation": "replace",
+                "content": new_content,
+            },
+        )
 
 
 @pytest.mark.asyncio

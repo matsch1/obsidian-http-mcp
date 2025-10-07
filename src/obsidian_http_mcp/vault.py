@@ -1,7 +1,6 @@
 from rapidfuzz import fuzz
 from pathlib import Path
 from dotenv import load_dotenv
-import yaml
 
 # ------------------------
 # Load environment
@@ -108,87 +107,11 @@ class Vault:
         return absolute_path
 
     def patch_content_into_note(
-        self, filepath: str, operation: str, target_type: str, target: str, content: str
+        self, filepath: str, target_type: str, target: str, operation: str, content: str
     ):
         absolute_path = self._resolve_markdown_path(filepath)
 
-        lines = absolute_path.read_text(encoding="utf-8").splitlines()
-
-        # get patcher related to target_type
-        handlers = {
-            "heading": self._patch_heading,
-            "frontmatter": self._patch_frontmatter,
-            "text": self._patch_text,
-        }
-
-        if target_type not in handlers:
-            raise ValueError(f"Unknown target_type: {target_type}")
-
-        # patch content (lines split by newline with newline at the end of the file)
-        updated_lines = handlers[target_type](lines, operation, target, content)
-
-        # write to file
-        absolute_path.write_text("\n".join(updated_lines) + "\n", encoding="utf-8")
-
-        return absolute_path
-
-    def _patch_heading(self, lines, operation, target, content):
-        anchor = target.lstrip("#").strip().lower()
-        matches = [
-            i
-            for i, line in enumerate(lines)
-            if line.strip().startswith("#")
-            and line.lstrip("#").strip().lower() == anchor
-        ]
-
-        if not matches:
-            raise ValueError(f"No heading '{target}' found")
-        if len(matches) > 1:
-            raise ValueError(f"Multiple headings '{target}' found. Must be unique.")
-
-        i = matches[0]
-
-        if operation == "prepend":
-            lines.insert(i + 1, content)
-        elif operation == "append":
-            lines.insert(i + 1, content)
-        elif operation == "replace":
-            new_lines = content.splitlines()
-            lines[i : i + 1] = new_lines
-        return lines
-
-    def _patch_frontmatter(self, lines, operation, target, content):
-        # If no frontmatter exists, create a new one (operation not needed)
-        if not (lines and lines[0].strip() == "---"):
-            data = {}
-            data[target] = content
-            new_frontmatter = yaml.safe_dump(data, sort_keys=False).strip()
-            return ["---", new_frontmatter, "---"] + lines
-
-        # Otherwise, modify existing frontmatter
-        end = next(
-            (i for i, line in enumerate(lines[1:], 1) if line.strip() == "---"),
-            None,
-        )
-        if end is None:
-            raise ValueError("Frontmatter not properly closed with '---'")
-
-        frontmatter = "\n".join(lines[1:end])
-        data = yaml.safe_load(frontmatter) or {}
-
-        old = data.get(target, "")
-        if operation == "replace":
-            data[target] = content
-        elif operation == "append":
-            data[target] = str(old) + ("\n" if old else "") + content
-        elif operation == "prepend":
-            data[target] = content + ("\n" if old else "") + str(old)
-
-        new_frontmatter = yaml.safe_dump(data, sort_keys=False).strip()
-        return ["---", new_frontmatter, "---"] + lines[end + 1 :]
-
-    def _patch_text(self, lines, operation, target, content):
-        text = "\n".join(lines)
+        text = absolute_path.read_text(encoding="utf-8")
 
         matches = text.count(target)
         if matches == 0:
@@ -198,14 +121,31 @@ class Vault:
                 f"Multiple matches for text '{target}' found. Must be unique."
             )
 
-        if operation == "replace":
-            text = text.replace(target, content, 1)
-        elif operation == "prepend":
-            text = text.replace(target, content + target, 1)
-        elif operation == "append":
-            text = text.replace(target, target + content, 1)
+        if target_type == "text":
+            if operation == "replace":
+                text = text.replace(target, content, 1)
+            elif operation == "prepend":
+                text = text.replace(target, content + target, 1)
+            elif operation == "append":
+                text = text.replace(target, target + content, 1)
+            else:
+                raise ValueError(f"Wrong operation '{operation}'")
+        elif target_type == "line":
+            if operation == "replace":
+                text = text.replace(target, content, 1)
+            elif operation == "prepend":
+                text = text.replace(target, content + "\n" + target, 1)
+            elif operation == "append":
+                text = text.replace(target, target + "\n" + content, 1)
+            else:
+                raise ValueError(f"Wrong operation '{operation}'")
+        else:
+            raise ValueError(f"Wrong target_type '{target}'")
 
-        return text.splitlines()
+        # write to file
+        absolute_path.write_text(text + "\n", encoding="utf-8")
+
+        return absolute_path
 
     def find_note_in_vault(
         self,
